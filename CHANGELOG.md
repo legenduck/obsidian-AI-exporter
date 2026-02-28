@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.11.3](https://github.com/sho7650/obsidian-AI-exporter/compare/v0.11.2...v0.11.3) (2026-02-28)
+
+
+### Bug Fixes
+
+* extract LaTeX from standard KaTeX for Perplexity/ChatGPT/Claude ([#85](https://github.com/sho7650/obsidian-AI-exporter/issues/85)) ([f0f8af3](https://github.com/sho7650/obsidian-AI-exporter/commit/f0f8af3480fc4bf4835a715ebd85d98fdabb5104))
+* extract LaTeX from standard KaTeX for Perplexity/ChatGPT/Claude ([#85](https://github.com/sho7650/obsidian-AI-exporter/issues/85)) ([6533866](https://github.com/sho7650/obsidian-AI-exporter/commit/65338661cadd8fa2ade88888bd58dea8e8bbbaf1))
+
 ## [0.11.2](https://github.com/sho7650/obsidian-AI-exporter/compare/v0.11.1...v0.11.2) (2026-02-27)
 
 
