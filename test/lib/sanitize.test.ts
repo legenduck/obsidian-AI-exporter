@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { sanitizeHtml } from '../../src/lib/sanitize';
+import { sanitizeHtml, preprocessKatex } from '../../src/lib/sanitize';
 
 describe('sanitizeHtml', () => {
   describe('preserves safe HTML', () => {
@@ -121,6 +121,133 @@ describe('sanitizeHtml', () => {
 
     it('handles whitespace-only input', () => {
       expect(sanitizeHtml('   ')).toBe('   ');
+    });
+  });
+
+  describe('standard KaTeX preprocessing integration (REQ-085)', () => {
+    it('converts standard KaTeX inline math through full pipeline', () => {
+      const html =
+        '<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow></mrow><annotation encoding="application/x-tex">x^2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true">x²</span></span>';
+      const result = sanitizeHtml(html);
+      expect(result).toContain('data-math="x^2"');
+      expect(result).not.toContain('<math');
+      expect(result).not.toContain('<annotation');
+    });
+
+    it('converts standard KaTeX display math through full pipeline', () => {
+      const html =
+        '<span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow></mrow><annotation encoding="application/x-tex">E = mc^2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true">E=mc²</span></span></span>';
+      const result = sanitizeHtml(html);
+      expect(result).toContain('data-math="E = mc^2"');
+      expect(result).not.toContain('<math');
+    });
+  });
+});
+
+/** Build minimal standard KaTeX HTML for testing */
+function buildKatexHtml(latex: string, display: boolean = false): string {
+  const mathAttrs = display
+    ? 'xmlns="http://www.w3.org/1998/Math/MathML" display="block"'
+    : 'xmlns="http://www.w3.org/1998/Math/MathML"';
+  const inner = `<span class="katex"><span class="katex-mathml"><math ${mathAttrs}><semantics><mrow></mrow><annotation encoding="application/x-tex">${latex}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true">rendered</span></span>`;
+  return display ? `<span class="katex-display">${inner}</span>` : inner;
+}
+
+describe('preprocessKatex', () => {
+  describe('display math conversion', () => {
+    it('converts span.katex-display to div[data-math]', () => {
+      const html = buildKatexHtml('E = mc^2', true);
+      const result = preprocessKatex(html);
+      expect(result).toContain('<div data-math="E = mc^2">');
+      expect(result).not.toContain('katex-display');
+    });
+  });
+
+  describe('inline math conversion', () => {
+    it('converts span.katex to span[data-math]', () => {
+      const html = buildKatexHtml('x^2');
+      const result = preprocessKatex(html);
+      expect(result).toContain('<span data-math="x^2">');
+      expect(result).not.toContain('katex-mathml');
+    });
+  });
+
+  describe('mixed display and inline', () => {
+    it('converts both display and inline in same HTML', () => {
+      const html = `<p>Inline: ${buildKatexHtml('x^2')}</p>${buildKatexHtml('E = mc^2', true)}`;
+      const result = preprocessKatex(html);
+      expect(result).toContain('<span data-math="x^2">');
+      expect(result).toContain('<div data-math="E = mc^2">');
+    });
+  });
+
+  describe('Gemini coexistence', () => {
+    it('skips elements inside [data-math] ancestor', () => {
+      const html =
+        '<div data-math="E=mc^2"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow></mrow><annotation encoding="application/x-tex">E=mc^2</annotation></semantics></math></span></span></div>';
+      const result = preprocessKatex(html);
+      // The outer div[data-math] should be preserved unchanged
+      expect(result).toContain('data-math="E=mc^2"');
+      // Should not create a second data-math element
+      const matches = result.match(/data-math/g);
+      expect(matches).toHaveLength(1);
+    });
+  });
+
+  describe('fallback behavior', () => {
+    it('leaves element unchanged when no annotation found', () => {
+      const html =
+        '<span class="katex"><span class="katex-html" aria-hidden="true">x²</span></span>';
+      const result = preprocessKatex(html);
+      // No data-math created — element left as-is
+      expect(result).not.toContain('data-math');
+    });
+
+    it('skips when annotation is whitespace-only', () => {
+      const html =
+        '<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow></mrow><annotation encoding="application/x-tex">   </annotation></semantics></math></span></span>';
+      const result = preprocessKatex(html);
+      expect(result).not.toContain('data-math');
+    });
+  });
+
+  describe('special characters', () => {
+    it('decodes HTML entities in LaTeX (& in pmatrix)', () => {
+      const html = buildKatexHtml('a &amp; b');
+      const result = preprocessKatex(html);
+      // textContent decodes &amp; to &, setAttribute re-encodes for attribute
+      // When read back via getAttribute, it will be "a & b"
+      // In serialized HTML, it appears as &amp; in the attribute value
+      expect(result).toContain('data-math');
+      // Verify the decoded value is present (DOMParser decodes, then serializes)
+      expect(result).toMatch(/data-math="a &amp; b"/);
+    });
+
+    it('trims multi-line annotation content (Perplexity pattern)', () => {
+      const html =
+        '<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow></mrow><annotation encoding="application/x-tex">\n  x = \\dfrac{-b}{2a}\n  </annotation></semantics></math></span><span class="katex-html" aria-hidden="true">rendered</span></span>';
+      const result = preprocessKatex(html);
+      expect(result).toContain('data-math="x = \\dfrac{-b}{2a}"');
+    });
+  });
+
+  describe('early return and edge cases', () => {
+    it('returns unchanged when no katex in HTML', () => {
+      const html = '<p>Hello World</p>';
+      const result = preprocessKatex(html);
+      expect(result).toBe(html);
+    });
+
+    it('returns empty string unchanged', () => {
+      expect(preprocessKatex('')).toBe('');
+    });
+
+    it('converts multiple formulas in one HTML block', () => {
+      const html = `<p>${buildKatexHtml('a')}, ${buildKatexHtml('b')}, ${buildKatexHtml('c')}</p>`;
+      const result = preprocessKatex(html);
+      expect(result).toContain('data-math="a"');
+      expect(result).toContain('data-math="b"');
+      expect(result).toContain('data-math="c"');
     });
   });
 });

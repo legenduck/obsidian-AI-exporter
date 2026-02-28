@@ -41,6 +41,7 @@ export default [
         AbortController: 'readonly',
         AbortSignal: 'readonly',
         DOMException: 'readonly',
+        DOMParser: 'readonly',
         HeadersInit: 'readonly'
       }
     },
