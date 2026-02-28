@@ -24,6 +24,8 @@ The following are **forbidden under any circumstances**. No exceptions. No conte
 - **NEVER** assume current state based on past information
 - **NEVER** assert "already done" without verification
 - **NEVER** apply "best practices" without validation
+- **NEVER** speculate on the cause of a failure — read the actual output first
+- **NEVER** dismiss a failure or problem as "cascading" or "unrelated" without evidence
 
 #### Implementation
 
@@ -41,6 +43,9 @@ The following are **always required**. No shortcuts.
 
 - **ALWAYS** follow: "I'll check" → actually check → report results
 - **ALWAYS** say "verification needed" when uncertain
+- **ALWAYS** read ALL details of a problem before attempting a fix
+- **ALWAYS** confirm every issue independently — never assume one problem explains another
+- **ALWAYS** ask the user before making any decision that has alternatives — merge strategy, file deletion, scope of changes, etc.
 
 #### Documentation
 

@@ -7,6 +7,7 @@ import {
   conversationToNote,
   convertDeepResearchContent,
 } from '../../src/content/markdown';
+import { sanitizeHtml } from '../../src/lib/sanitize';
 import type { ConversationData, TemplateOptions, DeepResearchLinks } from '../../src/lib/types';
 
 describe('htmlToMarkdown', () => {
@@ -149,6 +150,41 @@ describe('htmlToMarkdown', () => {
       expect(result).toContain('Before');
       expect(result).toContain('$$\nE = mc^2\n$$');
       expect(result).toContain('After');
+    });
+  });
+
+  describe('standard KaTeX math (REQ-085)', () => {
+    /** Build standard KaTeX HTML for full-pipeline tests */
+    function buildKatexHtml(latex: string, display: boolean = false): string {
+      const mathAttrs = display
+        ? 'xmlns="http://www.w3.org/1998/Math/MathML" display="block"'
+        : 'xmlns="http://www.w3.org/1998/Math/MathML"';
+      const inner = `<span class="katex"><span class="katex-mathml"><math ${mathAttrs}><semantics><mrow></mrow><annotation encoding="application/x-tex">${latex}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true">rendered</span></span>`;
+      return display ? `<span class="katex-display">${inner}</span>` : inner;
+    }
+
+    it('converts standard KaTeX display math to $$ block', () => {
+      const html = buildKatexHtml('E = mc^2', true);
+      const result = htmlToMarkdown(sanitizeHtml(html));
+      expect(result).toContain('$$\nE = mc^2\n$$');
+    });
+
+    it('converts standard KaTeX inline math to $ delimiters', () => {
+      const html = buildKatexHtml('x^2');
+      const result = htmlToMarkdown(sanitizeHtml(html));
+      expect(result).toBe('$x^2$');
+    });
+
+    it('handles inline math within paragraph text', () => {
+      const html = `<p>The value of ${buildKatexHtml('x^2')} is important.</p>`;
+      const result = htmlToMarkdown(sanitizeHtml(html));
+      expect(result).toBe('The value of $x^2$ is important.');
+    });
+
+    it('handles complex LaTeX with HTML entities (pmatrix &)', () => {
+      const html = buildKatexHtml('\\begin{pmatrix} a &amp; b \\end{pmatrix}');
+      const result = htmlToMarkdown(sanitizeHtml(html));
+      expect(result).toContain('$\\begin{pmatrix} a & b \\end{pmatrix}$');
     });
   });
 
