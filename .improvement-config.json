@@ -1,0 +1,50 @@
+{
+  "rounds": 5,
+  "focus": "all",
+  "qa": {
+    "eslint": true,
+    "prettier": true,
+    "typecheck": true,
+    "vitest": true,
+    "playwright": false,
+    "build": true,
+    "claude_review": true,
+    "severity_filter": ["critical", "high", "medium"],
+    "parallel_teams": true
+  },
+  "fix": {
+    "max_attempts_per_test": 3,
+    "full_suite_after_each_fix": true
+  },
+  "refactor": {
+    "enabled": true,
+    "max_per_round": 3,
+    "max_consecutive_failures": 2,
+    "max_files_per_refactor": 5,
+    "min_branch_coverage_pct": 60,
+    "strategies": [
+      "extract-function",
+      "simplify-conditional",
+      "remove-duplication",
+      "split-file",
+      "strengthen-types"
+    ]
+  },
+  "safety": {
+    "auto_revert_on_failure": true,
+    "savepoint_tags": true,
+    "sha_based_revert": true,
+    "cleanup_new_files_on_revert": true,
+    "test_timeout_ms": 120000,
+    "regression_detection": true,
+    "refactor_blocklist": true,
+    "manual_push_gate": true
+  },
+  "abort": {
+    "net_regression_rounds": 2,
+    "consecutive_phase4_reverts": 2
+  },
+  "self_learning": {
+    "enabled": true
+  }
+}
