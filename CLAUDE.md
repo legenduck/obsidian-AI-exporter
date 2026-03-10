@@ -95,10 +95,16 @@ Obsidian Local REST API (127.0.0.1:27123)
 | `src/content/extractors/claude.ts` | DOM extraction for Claude conversations & Artifacts        |
 | `src/content/extractors/base.ts`   | Abstract extractor with selector fallback & title helpers  |
 | `src/content/markdown.ts`          | HTML→Markdown via Turndown with custom rules               |
-| `src/lib/obsidian-api.ts`          | REST API client for Obsidian                               |
-| `src/lib/path-utils.ts`            | Path security & `{platform}` template resolution           |
+| `src/content/auto-sync.ts`         | MutationObserver auto-sync (debounced DOM change detection)|
+| `src/content/ui.ts`                | Status dot indicator & toast notifications                 |
+| `src/lib/obsidian-api.ts`          | REST API client for Obsidian (get/put/delete files + JSON) |
+| `src/lib/path-utils.ts`            | Path security & template resolution (`{platform}`, `{year}`, etc.) |
+| `src/lib/tree-builder.ts`          | Conversation tree builder (branch-preserving JSON)         |
+| `src/lib/tree-to-markdown.ts`      | Tree → LLM-optimized indent markdown converter             |
+| `src/lib/storage.ts`               | Chrome storage wrapper (settings, path tracking, exclusions)|
 | `src/lib/types.ts`                 | Shared TypeScript interfaces                               |
 | `src/background/index.ts`          | Service worker handling API calls & template resolution    |
+| `src/background/obsidian-handlers.ts` | Save, delete, JSON tree handlers                        |
 | `src/popup/`                       | Settings UI (toggle switches, collapsible advanced panel)  |
 
 ### Extractor Pattern
@@ -114,9 +120,37 @@ Extractors implement `IConversationExtractor` from `src/lib/types.ts`. The `Base
 
 ### Vault Path Templates
 
-Vault path supports `{platform}` template variable (default: `AI/{platform}`).
+Vault path supports template variables (default: `AI/{platform}`).
 `resolvePathTemplate()` in `src/lib/path-utils.ts` resolves variables at save time.
-The background service worker substitutes `{platform}` with the actual source (gemini, claude, chatgpt, perplexity).
+
+Supported variables: `{platform}`, `{year}`, `{month}`, `{weekday}`, `{title}`, `{sessionId}`
+
+### Status Dot & Auto-sync
+
+The content script injects a color-coded status dot (`src/content/ui.ts`):
+- **idle** (gray) → **watching** (blue) → **syncing** (blue pulse) → **synced** (green) → **watching**
+- **error** (red) — click for details
+- **deleting** (orange blink) → **excluded** (yellow) — long-press triggered session exclusion
+
+Auto-sync (`src/content/auto-sync.ts`) uses MutationObserver with debouncing to detect new messages and AI response completion.
+
+SPA navigation is detected via persistent URL polling (`watchForNavigation()` in `src/content/index.ts`).
+
+### JSON Tree Export
+
+When enabled, conversations are saved as branch-preserving JSON trees alongside LLM-optimized indent markdown:
+- `src/lib/tree-builder.ts` — builds `ConversationTree` from `ConversationData`, content-hash based node IDs
+- `src/lib/tree-to-markdown.ts` — converts tree to indented markdown with branch labels
+- Files saved under `.json/` and `.llm/` dot-prefixed directories (hidden from Obsidian indexing)
+- `mergeTree()` accumulates branches across syncs
+
+### Session Exclusion
+
+Long-press (2s) the status dot to exclude a session:
+- Deletes tracked files (md, json, llm) via `ObsidianApiClient.deleteFile()`
+- File paths tracked per conversation in `chrome.storage.local` (`paths:{convId}`)
+- Excluded sessions stored in `chrome.storage.local` (`excludedSessions`)
+- Click yellow dot to resume syncing
 
 ### DOM Selectors
 

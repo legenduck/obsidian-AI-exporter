@@ -10,8 +10,11 @@ Chrome Extension that exports AI conversations from Google Gemini, Claude AI, Ch
 ## Features
 
 - **Multi-platform support**: Export from Google Gemini, Claude AI, ChatGPT, and Perplexity
-- **One-click export**: Floating "Sync" button on supported AI pages
+- **Status indicator**: Color-coded dot shows sync state (idle/watching/syncing/synced/error)
+- **Auto-sync**: Automatically syncs when new messages appear via MutationObserver
 - **Multiple output options**: Save to Obsidian, download as file, or copy to clipboard
+- **JSON Tree Export**: Save conversation branches as JSON tree with LLM-optimized markdown
+- **Session exclusion**: Long-press (2s) the indicator to exclude a session and delete its files
 - **Deep Research support**: Export Gemini Deep Research and Claude Extended Thinking reports
 - **Artifact support**: Extract Claude Artifacts with inline citations and sources
 - **Tool content support**: Optionally include Claude's web search results and tool activity as collapsible `[!ABSTRACT]` callouts
@@ -19,7 +22,7 @@ Chrome Extension that exports AI conversations from Google Gemini, Claude AI, Ch
 - **Obsidian callouts**: Formatted output with `[!QUESTION]` and `[!NOTE]` callouts
 - **YAML frontmatter**: Metadata including title, source, URL, dates, and tags
 - **Auto-scroll**: Automatically loads all messages in long Gemini conversations
-- **Platform-based organization**: Use `{platform}` template in vault path for auto-sorting
+- **Path templates**: Use `{platform}`, `{year}`, `{month}`, `{weekday}`, `{title}`, `{sessionId}` in vault path
 - **Configurable**: Customizable vault path, template options, and frontmatter fields
 - **Localized**: English and Japanese UI support
 
@@ -72,32 +75,25 @@ Chrome Extension that exports AI conversations from Google Gemini, Claude AI, Ch
 
 ## Usage
 
-### Gemini
+### Basic Usage
 
-1. Open a conversation on [gemini.google.com](https://gemini.google.com)
-2. Click the purple "Sync" button in the bottom-right corner
-3. The conversation will be exported based on your selected output method:
+1. Open a conversation on any supported platform ([Gemini](https://gemini.google.com), [Claude](https://claude.ai), [ChatGPT](https://chatgpt.com), [Perplexity](https://www.perplexity.ai))
+2. A small status dot appears in the bottom-right corner
+3. Click the dot to sync the conversation to your configured outputs:
    - **Obsidian** (default): Saved directly to your vault via Local REST API
    - **File**: Downloaded as a Markdown file
    - **Clipboard**: Copied to clipboard for pasting anywhere
 
-### Claude
+### Auto-sync
 
-1. Open a conversation on [claude.ai](https://claude.ai)
-2. Click the purple "Sync" button in the bottom-right corner
-3. The conversation will be exported with the same output options as Gemini
+When enabled in settings, conversations sync automatically as new messages appear. No manual clicking needed.
 
-### ChatGPT
+### Session Exclusion
 
-1. Open a conversation on [chatgpt.com](https://chatgpt.com)
-2. Click the purple "Sync" button in the bottom-right corner
-3. The conversation will be exported with the same output options as Gemini
-
-### Perplexity
-
-1. Open a conversation on [www.perplexity.ai](https://www.perplexity.ai)
-2. Click the purple "Sync" button in the bottom-right corner
-3. The conversation will be exported with the same output options as Gemini
+Long-press the status dot for 2 seconds to exclude a session:
+- The dot blinks orange while deleting files (md, JSON tree, LLM markdown)
+- After deletion, the dot turns yellow (excluded)
+- Click the yellow dot to resume syncing for that session
 
 ### Deep Research / Extended Thinking Export
 
@@ -226,9 +222,12 @@ Obsidian Local REST API (127.0.0.1:27123)
 | `src/content/extractors/claude.ts` | Claude conversation & Artifact extractor |
 | `src/content/extractors/chatgpt.ts` | ChatGPT conversation extractor |
 | `src/content/extractors/perplexity.ts` | Perplexity conversation extractor |
+| `src/content/auto-sync.ts` | MutationObserver-based auto-sync |
 | `src/background/` | Service worker for API communication |
 | `src/popup/` | Settings UI |
 | `src/lib/` | Shared utilities and types |
+| `src/lib/tree-builder.ts` | Conversation tree builder (branch-preserving JSON) |
+| `src/lib/tree-to-markdown.ts` | Tree to LLM-optimized indent markdown |
 
 ## Security
 

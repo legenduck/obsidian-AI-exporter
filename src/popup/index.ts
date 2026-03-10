@@ -79,9 +79,13 @@ const elements = {
   includeSource: getElement<HTMLInputElement>('includeSource'),
   includeDates: getElement<HTMLInputElement>('includeDates'),
   includeMessageCount: getElement<HTMLInputElement>('includeMessageCount'),
+  enableAutoSync: getElement<HTMLInputElement>('enableAutoSync'),
   enableAutoScroll: getElement<HTMLInputElement>('enableAutoScroll'),
   enableAppendMode: getElement<HTMLInputElement>('enableAppendMode'),
   enableToolContent: getElement<HTMLInputElement>('enableToolContent'),
+  enableJsonTree: getElement<HTMLInputElement>('enableJsonTree'),
+  jsonOutputPath: getElement<HTMLInputElement>('jsonOutputPath'),
+  jsonPathGroup: getElement<HTMLElement>('jsonPathGroup'),
   testBtn: getElement<HTMLButtonElement>('testBtn'),
   saveBtn: getElement<HTMLButtonElement>('saveBtn'),
   status: getElement<HTMLDivElement>('status'),
@@ -114,9 +118,13 @@ function populateForm(settings: ExtensionSettings): void {
   elements.outputClipboard.checked = outputOptions?.clipboard ?? false;
 
   // Extraction options
+  elements.enableAutoSync.checked = settings.enableAutoSync ?? false;
   elements.enableAutoScroll.checked = settings.enableAutoScroll ?? false;
   elements.enableAppendMode.checked = settings.enableAppendMode ?? false;
   elements.enableToolContent.checked = settings.enableToolContent ?? false;
+  elements.enableJsonTree.checked = settings.enableJsonTree ?? false;
+  elements.jsonOutputPath.value = settings.jsonOutputPath || 'AI/json/{platform}';
+  updateJsonPathVisibility();
 
   // Update Obsidian settings section visibility
   updateObsidianSettingsVisibility();
@@ -140,6 +148,13 @@ function populateForm(settings: ExtensionSettings): void {
 
   // Sync aria-checked for toggle switches after setting checked state
   syncAllAriaChecked();
+}
+
+/**
+ * Update JSON path input visibility based on enableJsonTree toggle
+ */
+function updateJsonPathVisibility(): void {
+  elements.jsonPathGroup.style.display = elements.enableJsonTree.checked ? '' : 'none';
 }
 
 /**
@@ -176,6 +191,9 @@ function setupEventListeners(): void {
     elements.userCallout.disabled = !isCallout;
     elements.assistantCallout.disabled = !isCallout;
   });
+
+  // JSON tree toggle controls path input visibility
+  elements.enableJsonTree.addEventListener('change', updateJsonPathVisibility);
 
   // Setup API key visibility toggle
   setupApiKeyToggle();
@@ -241,6 +259,7 @@ function collectOutputOptions(): OutputOptions {
     obsidian: elements.outputObsidian.checked,
     file: elements.outputFile.checked,
     clipboard: elements.outputClipboard.checked,
+    json: elements.enableJsonTree.checked,
   };
 }
 
@@ -248,7 +267,7 @@ function collectOutputOptions(): OutputOptions {
  * Validate that at least one output is selected
  */
 function validateOutputOptions(outputOptions: OutputOptions): boolean {
-  return outputOptions.obsidian || outputOptions.file || outputOptions.clipboard;
+  return outputOptions.obsidian || outputOptions.file || outputOptions.clipboard || outputOptions.json;
 }
 
 const VALID_MESSAGE_FORMATS = ['callout', 'plain', 'blockquote'] as const;
@@ -284,9 +303,12 @@ function collectSettings(): ExtensionSettings {
     vaultPath: elements.vaultPath.value.trim(),
     templateOptions,
     outputOptions,
+    enableAutoSync: elements.enableAutoSync.checked,
     enableAutoScroll: elements.enableAutoScroll.checked,
     enableAppendMode: elements.enableAppendMode.checked,
     enableToolContent: elements.enableToolContent.checked,
+    enableJsonTree: elements.enableJsonTree.checked,
+    jsonOutputPath: elements.jsonOutputPath.value.trim() || 'AI/json/{platform}',
   };
 }
 

@@ -61,6 +61,19 @@
           <h2 data-i18n="settings_extraction">Extraction</h2>
           <div class="toggle-list">
             <label class="toggle-row">
+              <span class="toggle-icon">⚡</span>
+              <span class="toggle-label">
+                <span>Auto-sync</span>
+                <span class="toggle-sublabel">
+                  Automatically sync when new messages appear
+                </span>
+              </span>
+              <span class="toggle-switch">
+                <input type="checkbox" id="enableAutoSync" role="switch" aria-checked="false" />
+                <span class="slider" aria-hidden="true"></span>
+              </span>
+            </label>
+            <label class="toggle-row">
               <span class="toggle-icon">🔄</span>
               <span class="toggle-label">
                 <span data-i18n="settings_enableAutoScroll">Auto-scroll</span>
@@ -99,6 +112,32 @@
                 <span class="slider" aria-hidden="true"></span>
               </span>
             </label>
+            <label class="toggle-row">
+              <span class="toggle-icon">🌳</span>
+              <span class="toggle-label">
+                <span>JSON Tree Export</span>
+                <span class="toggle-sublabel">
+                  Save conversation branches as JSON tree + LLM markdown
+                </span>
+              </span>
+              <span class="toggle-switch">
+                <input type="checkbox" id="enableJsonTree" role="switch" aria-checked="false" />
+                <span class="slider" aria-hidden="true"></span>
+              </span>
+            </label>
+            <div class="form-group json-path-group" id="jsonPathGroup" style="display: none">
+              <label for="jsonOutputPath">JSON Tree Path</label>
+              <input
+                type="text"
+                id="jsonOutputPath"
+                placeholder="AI/{platform}"
+                value="AI/{platform}"
+              />
+              <p class="help">
+                Base path for JSON tree files. Subdirectories .json/ and .llm/ are created
+                automatically (hidden from Obsidian). Use {platform} for auto-organize.
+              </p>
+            </div>
           </div>
         </section>
 
