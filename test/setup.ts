@@ -47,6 +47,13 @@ const chromeMock = {
       }
     ),
   },
+  // For keep-alive alarm
+  alarms: {
+    create: vi.fn(),
+    onAlarm: {
+      addListener: vi.fn(),
+    },
+  },
   // For clipboard operations via offscreen document
   offscreen: {
     createDocument: vi.fn(() => Promise.resolve()),

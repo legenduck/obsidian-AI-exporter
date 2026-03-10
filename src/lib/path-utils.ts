@@ -25,15 +25,41 @@ export function containsPathTraversal(path: string): boolean {
 
 /**
  * Resolve template variables in a vault path
- * Supported variables: {platform}
+ * Supported variables: {platform}, {year}, {month}, {weekday}, {title}, {sessionId}
  * Unknown variables are preserved as-is (safe fallback)
  *
  * @example
- * resolvePathTemplate('AI/{platform}', { platform: 'gemini' })
- * // → 'AI/gemini'
+ * resolvePathTemplate('AI/{platform}/{year}-{month}', { platform: 'gemini', year: '2026', month: '03' })
+ * // → 'AI/gemini/2026-03'
  */
 export function resolvePathTemplate(path: string, variables: Record<string, string>): string {
   return path.replace(/\{(\w+)\}/g, (match, key: string) => {
     return key in variables ? variables[key] : match;
   });
+}
+
+const WEEKDAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] as const;
+
+/**
+ * Build date-based template variables from a Date object
+ */
+export function buildDateVariables(date: Date): Record<string, string> {
+  return {
+    year: String(date.getFullYear()),
+    month: String(date.getMonth() + 1).padStart(2, '0'),
+    weekday: WEEKDAY_NAMES[date.getDay()],
+  };
+}
+
+/**
+ * Sanitize a string for use in file/folder names
+ * Removes characters not allowed in file names and replaces spaces with hyphens
+ */
+export function sanitizeFileName(name: string): string {
+  return name
+    .replace(/[/\\:*?"<>|]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '')
+    .slice(0, 100);
 }

@@ -114,9 +114,51 @@ export interface NoteFrontmatter {
 }
 
 /**
+ * JSON tree node representing a single message in the conversation tree
+ */
+export interface TreeNode {
+  /** Unique node ID: `${role}-${index}-${contentHash8}` */
+  id: string;
+  /** Message author role */
+  role: 'user' | 'assistant';
+  /** Message content (plain text) */
+  content: string;
+  /** Parent node ID, null for root */
+  parent: string | null;
+  /** Child node IDs */
+  children: string[];
+  /** Tool-use content (web search, code interpreter) */
+  toolContent?: string;
+  /** ISO 8601 timestamp */
+  timestamp?: string;
+}
+
+/**
+ * Full conversation tree with branch tracking
+ */
+export interface ConversationTree {
+  /** Conversation ID (from URL) */
+  id: string;
+  /** Conversation title */
+  title: string;
+  /** Source AI platform */
+  source: AIPlatform;
+  /** Conversation URL */
+  url: string;
+  /** ISO 8601 creation timestamp */
+  created: string;
+  /** ISO 8601 last modified timestamp */
+  modified: string;
+  /** Currently active message path (ordered node IDs) */
+  activePath: string[];
+  /** All nodes keyed by node ID */
+  tree: Record<string, TreeNode>;
+}
+
+/**
  * Output destination identifier
  */
-export type OutputDestination = 'obsidian' | 'file' | 'clipboard';
+export type OutputDestination = 'obsidian' | 'file' | 'clipboard' | 'json';
 
 /**
  * Output option settings
@@ -129,6 +171,8 @@ export interface OutputOptions {
   file: boolean;
   /** Copy to system clipboard */
   clipboard: boolean;
+  /** Export as JSON tree (branch-preserving) */
+  json: boolean;
 }
 
 /**
@@ -184,6 +228,12 @@ export interface SyncSettings {
   enableAppendMode: boolean;
   /** Include tool-use / intermediate content (e.g., web search results) */
   enableToolContent: boolean;
+  /** Enable JSON tree export (branch-preserving) */
+  enableJsonTree: boolean;
+  /** Vault path for JSON tree files (supports {platform} template) */
+  jsonOutputPath: string;
+  /** Enable auto-sync on DOM changes (MutationObserver) */
+  enableAutoSync: boolean;
 }
 
 /**
@@ -228,10 +278,13 @@ export interface TemplateOptions {
  */
 export type ExtensionMessage =
   | { action: 'saveToObsidian'; data: ObsidianNote }
-  | { action: 'saveToOutputs'; data: ObsidianNote; outputs: OutputDestination[] }
+  | { action: 'saveToOutputs'; data: ObsidianNote; outputs: OutputDestination[]; conversationId: string }
   | { action: 'getExistingFile'; fileName: string; vaultPath: string }
   | { action: 'getSettings' }
-  | { action: 'testConnection' };
+  | { action: 'testConnection' }
+  | { action: 'saveJsonTree'; tree: ConversationTree; vaultPath: string }
+  | { action: 'getJsonTree'; conversationId: string; vaultPath: string }
+  | { action: 'deleteSession'; conversationId: string };
 
 /**
  * Response from background service worker
@@ -268,6 +321,7 @@ export interface ValidationResult {
 export interface IConversationExtractor {
   readonly platform: AIPlatform;
   canExtract(): boolean;
+  isConversationPage(): boolean;
   extract(): Promise<ExtractionResult>;
   getConversationId(): string | null;
   getTitle(): string;

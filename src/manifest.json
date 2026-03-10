@@ -16,7 +16,8 @@
     "storage",
     "downloads",
     "offscreen",
-    "clipboardWrite"
+    "clipboardWrite",
+    "alarms"
   ],
   "host_permissions": [
     "https://gemini.google.com/*",

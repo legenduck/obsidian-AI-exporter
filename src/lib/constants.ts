@@ -78,6 +78,9 @@ export const AUTO_SAVE_CHECK_INTERVAL = 10000;
 /** Event throttle delay (milliseconds) */
 export const EVENT_THROTTLE_DELAY = 1000;
 
+/** Auto-sync debounce delay (milliseconds) — waits after last DOM change before syncing */
+export const AUTO_SYNC_DEBOUNCE_DELAY = 5000;
+
 // ============================================================
 // Security Constants
 // ============================================================
@@ -103,12 +106,15 @@ export const VALID_MESSAGE_ACTIONS = [
   'testConnection',
   'saveToObsidian',
   'saveToOutputs',
+  'saveJsonTree',
+  'getJsonTree',
+  'deleteSession',
 ] as const;
 
 /**
  * Valid output destinations for multi-output operations
  */
-export const VALID_OUTPUT_DESTINATIONS = ['obsidian', 'file', 'clipboard'] as const;
+export const VALID_OUTPUT_DESTINATIONS = ['obsidian', 'file', 'clipboard', 'json'] as const;
 
 /**
  * Valid AI platform sources

@@ -28,6 +28,14 @@ export abstract class BaseExtractor implements IConversationExtractor {
   abstract getTitle(): string;
   abstract extractMessages(): ConversationMessage[];
 
+  /**
+   * Check if current URL is a valid conversation page (not /new, /settings, etc.)
+   * Uses getConversationId() which already validates platform-specific URL patterns.
+   */
+  isConversationPage(): boolean {
+    return this.getConversationId() !== null;
+  }
+
   // ========== Platform Label ==========
 
   /**
