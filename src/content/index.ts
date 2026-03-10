@@ -8,22 +8,18 @@ import { ClaudeExtractor } from './extractors/claude';
 import { ChatGPTExtractor } from './extractors/chatgpt';
 import { PerplexityExtractor } from './extractors/perplexity';
 import { extractErrorMessage } from '../lib/error-utils';
-import type { IConversationExtractor } from '../lib/types';
+import { buildConversationTree } from '../lib/tree-builder';
+import type { ConversationData, IConversationExtractor } from '../lib/types';
 import { conversationToNote } from './markdown';
-import {
-  injectSyncButton,
-  setButtonLoading,
-  showSuccessToast,
-  showErrorToast,
-  showWarningToast,
-  showToast,
-} from './ui';
+import { injectStatusDot, setDotStatus, completeSyncTransition } from './ui';
 import { sendMessage } from '../lib/messaging';
 import {
   AUTO_SAVE_CHECK_INTERVAL,
+  AUTO_SYNC_DEBOUNCE_DELAY,
   EVENT_THROTTLE_DELAY,
-  INFO_TOAST_DURATION,
 } from '../lib/constants';
+import { startAutoSync } from './auto-sync';
+import { isSessionExcluded, removeExcludedSession } from '../lib/storage';
 import type {
   ExtensionSettings,
   ObsidianNote,
@@ -69,7 +65,7 @@ const CONVERSATION_CONTAINER_SELECTOR =
  * Get the optimal observation root for the current platform
  * Falls back to document.body if no platform-specific root is found
  */
-function getObservationRoot(): Element {
+export function getObservationRoot(): Element {
   const hostname = window.location.hostname;
   const selectors = PLATFORM_ROOT_SELECTORS[hostname];
 
@@ -171,19 +167,6 @@ function getExtractor(): IConversationExtractor | null {
   return null;
 }
 
-// Initialize when DOM is ready
-const startInit = () => {
-  initialize().catch(error => {
-    console.error('[G2O] Content script initialization failed:', error);
-  });
-};
-
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', startInit);
-} else {
-  startInit();
-}
-
 /**
  * Initialize the content script
  */
@@ -199,13 +182,89 @@ async function initialize(): Promise<void> {
 
   console.info(`[G2O] Using ${extractor.platform} extractor`);
 
+  // Inject status dot immediately (gray = idle)
+  const throttledHandleSync = throttle(handleSync, EVENT_THROTTLE_DELAY);
+  injectStatusDot(throttledHandleSync, handleLongPress);
+  console.info('[G2O] Status dot injected (idle)');
+
+  // Always watch for SPA navigation (persistent, handles all transitions)
+  watchForNavigation();
+
+  // Check if we're on a valid conversation page
+  if (extractor.isConversationPage()) {
+    // Check if this session is excluded
+    const convId = extractor.getConversationId();
+    if (convId && await isSessionExcluded(convId)) {
+      setDotStatus('excluded');
+      console.info('[G2O] Session excluded:', convId);
+      return;
+    }
+    await activateOnConversation();
+  } else {
+    console.info('[G2O] Not on a conversation page, waiting for navigation');
+  }
+}
+
+/**
+ * Activate watching and auto-sync on a valid conversation page
+ */
+async function activateOnConversation(): Promise<void> {
   // Wait for conversation container (L-03)
   await waitForConversationContainer();
 
-  // Apply throttle to sync handler (NEW-06)
-  const throttledHandleSync = throttle(handleSync, EVENT_THROTTLE_DELAY);
-  injectSyncButton(throttledHandleSync);
-  console.info('[G2O] Sync button injected');
+  // Platform recognized → watching (blue)
+  setDotStatus('watching');
+  console.info('[G2O] Conversation detected, watching');
+
+  // Auto-sync: run initial sync, then watch for new messages
+  const settings = await getSettings();
+  if (settings.enableAutoSync) {
+    handleSync();
+    const root = getObservationRoot();
+    startAutoSync(handleSync, AUTO_SYNC_DEBOUNCE_DELAY, root);
+  }
+}
+
+/** URL polling interval for SPA navigation detection (milliseconds) */
+const NAVIGATION_POLL_INTERVAL = 500;
+
+/** Guard against duplicate navigation polling (e.g., content script re-injection) */
+let navigationIntervalId: ReturnType<typeof setInterval> | null = null;
+
+/**
+ * Watch for SPA navigation and handle page transitions.
+ * Runs persistently — does not stop after first navigation.
+ * Handles: conversation → conversation, conversation → /new, /new → conversation,
+ * excluded session detection on navigation.
+ */
+function watchForNavigation(): void {
+  if (navigationIntervalId !== null) return;
+
+  let lastPathname = window.location.pathname;
+
+  navigationIntervalId = setInterval(async () => {
+    const currentPath = window.location.pathname;
+    if (currentPath === lastPathname) return;
+    lastPathname = currentPath;
+
+    console.info('[G2O] SPA navigation detected:', currentPath);
+
+    const extractor = getExtractor();
+    if (!extractor) return;
+
+    if (extractor.isConversationPage()) {
+      // Check if this session is excluded
+      const convId = extractor.getConversationId();
+      if (convId && await isSessionExcluded(convId)) {
+        setDotStatus('excluded');
+        return;
+      }
+      await activateOnConversation();
+    } else {
+      // Non-conversation page (e.g., /new, /settings) → idle
+      setDotStatus('idle');
+    }
+  }, NAVIGATION_POLL_INTERVAL);
 }
 
 /**
@@ -249,53 +308,71 @@ async function validateOutputConfig(
 }
 
 /**
- * Display save results to the user via toasts
+ * Extract error message from save results (for red dot)
+ * Returns null if all successful
  */
-function displaySaveResults(
-  saveResult: MultiOutputResponse,
-  fileName: string,
-  extractionWarnings?: string[]
-): void {
-  // Show append-specific messages when applicable
-  if (saveResult.allSuccessful && saveResult.messagesAppended !== undefined) {
-    if (saveResult.messagesAppended > 0) {
-      showToast(`${saveResult.messagesAppended} new message(s) appended`, 'success');
-    } else {
-      showToast('No new messages to append', 'info', INFO_TOAST_DURATION);
-    }
-  } else if (saveResult.allSuccessful) {
-    showSuccessToast(fileName, true);
-  } else if (saveResult.anySuccessful) {
-    const successList = saveResult.results
-      .filter((r: OutputResult) => r.success)
-      .map((r: OutputResult) => r.destination)
-      .join(', ');
+function getSaveErrorMessage(saveResult: MultiOutputResponse): string | null {
+  if (saveResult.allSuccessful) return null;
+
+  if (saveResult.anySuccessful) {
     const failedList = saveResult.results
       .filter((r: OutputResult) => !r.success)
       .map((r: OutputResult) => `${r.destination}: ${r.error}`)
       .join('; ');
-    showWarningToast(`Saved to: ${successList}. Failed: ${failedList}`);
-  } else {
-    const errorMsg = saveResult.results
-      .map((r: OutputResult) => r.error)
-      .filter(Boolean)
-      .join('; ');
-    showErrorToast(errorMsg || 'Failed to save');
+    return `Partial failure: ${failedList}`;
   }
 
-  if (extractionWarnings && extractionWarnings.length > 0 && saveResult.anySuccessful) {
-    setTimeout(() => {
-      showWarningToast(extractionWarnings.join('. '));
-    }, INFO_TOAST_DURATION);
+  return (
+    saveResult.results
+      .map((r: OutputResult) => r.error)
+      .filter(Boolean)
+      .join('; ') || 'Failed to save'
+  );
+}
+
+/**
+ * Handle long press on status dot (2s) — exclude session and delete files
+ */
+async function handleLongPress(): Promise<void> {
+  const extractor = getExtractor();
+  if (!extractor?.isConversationPage()) return;
+  const convId = extractor.getConversationId();
+  if (!convId) return;
+
+  console.info('[G2O] Long press — excluding session:', convId);
+  setDotStatus('deleting');
+
+  try {
+    const result = await sendMessage({ action: 'deleteSession', conversationId: convId });
+    if (!result.success) {
+      console.warn('[G2O] Delete session had errors:', result.error);
+    }
+  } catch (error) {
+    console.warn('[G2O] Delete session failed:', extractErrorMessage(error));
   }
+
+  setDotStatus('excluded');
 }
 
 /**
  * Handle sync button click
  */
 async function handleSync(): Promise<void> {
+  // Resume from excluded state: remove exclusion, then sync normally
+  const extractor = getExtractor();
+  if (extractor?.isConversationPage()) {
+    const convId = extractor.getConversationId();
+    if (convId) {
+      const excluded = await isSessionExcluded(convId);
+      if (excluded) {
+        console.info('[G2O] Resuming excluded session:', convId);
+        await removeExcludedSession(convId);
+      }
+    }
+  }
+
   console.info('[G2O] Sync initiated');
-  setButtonLoading(true);
+  setDotStatus('syncing');
 
   try {
     // Get settings first (L-01: use type-safe messaging)
@@ -305,25 +382,30 @@ async function handleSync(): Promise<void> {
     // Validate output configuration
     const configError = await validateOutputConfig(settings, enabledOutputs);
     if (configError) {
-      showErrorToast(configError);
+      setDotStatus('error', configError);
       return;
     }
 
-    // Extract conversation using appropriate extractor
-    const extractor = getExtractor();
-    if (!extractor || !extractor.canExtract()) {
-      showErrorToast('Not on a valid conversation page');
+    // Re-get extractor (handleSync may be called without the outer extractor)
+    const syncExtractor = getExtractor();
+    if (!syncExtractor || !syncExtractor.canExtract()) {
+      setDotStatus('error', 'Not on a valid conversation page');
       return;
     }
 
-    showToast('Extracting conversation...', 'info', INFO_TOAST_DURATION);
-    extractor.applySettings(settings);
-    const result = await extractor.extract();
+    // Silently skip sync on non-conversation pages (e.g., /new, /settings)
+    if (!syncExtractor.isConversationPage()) {
+      setDotStatus('idle');
+      return;
+    }
+
+    syncExtractor.applySettings(settings);
+    const result = await syncExtractor.extract();
 
     // Validate extraction
-    const validation = extractor.validate(result);
+    const validation = syncExtractor.validate(result);
     if (!validation.isValid) {
-      showErrorToast(validation.errors.join(', ') || 'Extraction failed');
+      setDotStatus('error', validation.errors.join(', ') || 'Extraction failed');
       return;
     }
 
@@ -334,7 +416,7 @@ async function handleSync(): Promise<void> {
     }
 
     if (!result.data) {
-      showErrorToast('No conversation data extracted');
+      setDotStatus('error', 'No conversation data extracted');
       return;
     }
 
@@ -348,15 +430,30 @@ async function handleSync(): Promise<void> {
     });
 
     // Save to enabled outputs
-    showToast('Saving...', 'info', INFO_TOAST_DURATION);
-    const saveResult = await saveToOutputs(note, enabledOutputs);
+    const conversationId = result.data.id;
+    const saveResult = await saveToOutputs(note, enabledOutputs, conversationId);
 
-    displaySaveResults(saveResult, note.fileName, result.warnings);
+    const saveError = getSaveErrorMessage(saveResult);
+    if (saveError) {
+      setDotStatus('error', saveError);
+      return;
+    }
+
+    // JSON tree export (runs after .md save, independent pipeline)
+    if (settings.enableJsonTree && result.data) {
+      await saveJsonTree(result.data, settings);
+    }
+
+    // Success: syncing → synced (green) → watching (blue)
+    completeSyncTransition();
   } catch (error) {
+    const msg = extractErrorMessage(error);
     console.error('[G2O] Sync error:', error);
-    showErrorToast(extractErrorMessage(error));
-  } finally {
-    setButtonLoading(false);
+    if (msg.includes('Extension context invalidated')) {
+      setDotStatus('idle');
+    } else {
+      setDotStatus('error', msg);
+    }
   }
 }
 
@@ -382,7 +479,46 @@ function testConnection(): Promise<{ success: boolean; error?: string }> {
  */
 function saveToOutputs(
   note: ObsidianNote,
-  outputs: OutputDestination[]
+  outputs: OutputDestination[],
+  conversationId: string
 ): Promise<MultiOutputResponse> {
-  return sendMessage({ action: 'saveToOutputs', data: note, outputs });
+  return sendMessage({ action: 'saveToOutputs', data: note, outputs, conversationId });
+}
+
+/**
+ * Build and save JSON tree via background script
+ * Runs independently from the .md pipeline — errors are logged but don't block sync
+ */
+async function saveJsonTree(
+  data: ConversationData,
+  settings: ExtensionSettings
+): Promise<void> {
+  try {
+    const tree = buildConversationTree(data);
+    const treeResult = await sendMessage({
+      action: 'saveJsonTree',
+      tree,
+      vaultPath: settings.jsonOutputPath,
+    });
+    if (treeResult.success) {
+      console.info('[G2O] JSON tree saved');
+    } else {
+      console.warn('[G2O] JSON tree save failed:', treeResult.error);
+    }
+  } catch (error) {
+    console.warn('[G2O] JSON tree export error:', extractErrorMessage(error));
+  }
+}
+
+// Initialize when DOM is ready (must be at end of file to avoid TDZ issues with bundler)
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => {
+    initialize().catch(error => {
+      console.error('[G2O] Content script initialization failed:', error);
+    });
+  });
+} else {
+  initialize().catch(error => {
+    console.error('[G2O] Content script initialization failed:', error);
+  });
 }
