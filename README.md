@@ -1,5 +1,7 @@
 # Obsidian AI Exporter
 
+> Fork of [sho7650/obsidian-AI-exporter](https://github.com/sho7650/obsidian-AI-exporter) — added auto-sync, JSON tree export, session exclusion, and status dot indicator.
+
 Chrome Extension that exports AI conversations from Google Gemini, Claude AI, ChatGPT, and Perplexity to Obsidian via the Local REST API.
 
 [日本語版はこちら](README.ja.md)
