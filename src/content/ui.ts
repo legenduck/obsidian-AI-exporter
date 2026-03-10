@@ -1,122 +1,127 @@
 /**
  * UI components for content script
- * Floating button, toast notifications, loading states
+ * Status dot indicator and toast notifications
  */
 
-import {
-  DEFAULT_TOAST_DURATION,
-  SUCCESS_TOAST_DURATION,
-  ERROR_TOAST_DURATION,
-  WARNING_TOAST_DURATION,
-} from '../lib/constants';
-import { getMessage } from '../lib/i18n';
+import { ERROR_TOAST_DURATION } from '../lib/constants';
+
+// Status dot states
+export type DotStatus = 'idle' | 'watching' | 'syncing' | 'synced' | 'error' | 'deleting' | 'excluded';
+
+const DOT_COLORS: Record<DotStatus, string> = {
+  idle: '#9ca3af',
+  watching: '#3b82f6',
+  syncing: '#3b82f6',
+  synced: '#10b981',
+  error: '#ef4444',
+  deleting: '#f59e0b',
+  excluded: '#eab308',
+};
+
+const DOT_TOOLTIPS: Record<DotStatus, string> = {
+  idle: 'Initializing...',
+  watching: 'Tracking',
+  syncing: 'Syncing...',
+  synced: 'Synced',
+  error: 'Error — click for details',
+  deleting: 'Deleting...',
+  excluded: 'Excluded — click to resume',
+};
+
+/** Minimum pulse count during syncing before transition */
+const MIN_PULSE_COUNT = 3;
+/** Duration of each pulse cycle in ms */
+const PULSE_DURATION = 800;
+/** How long the green "synced" dot stays before returning to watching */
+const SYNCED_DISPLAY_MS = 1000;
+/** Long press duration to trigger session exclusion (ms) */
+const LONG_PRESS_DURATION = 2000;
 
 // CSS styles for UI components
 const STYLES = `
-  #g2o-sync-button {
+  #g2o-dot {
     position: fixed;
-    bottom: 20px;
-    right: 20px;
+    bottom: 16px;
+    right: 16px;
     z-index: 10000;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 12px 20px;
-    background: linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%);
-    color: white;
-    border: none;
-    border-radius: 12px;
-    font-size: 14px;
-    font-weight: 600;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    cursor: pointer;
-    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.4);
-    transition: all 0.2s ease;
-  }
-
-  #g2o-sync-button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(124, 58, 237, 0.5);
-  }
-
-  #g2o-sync-button:active {
-    transform: translateY(0);
-  }
-
-  #g2o-sync-button:disabled {
-    opacity: 0.7;
-    cursor: not-allowed;
-    transform: none;
-  }
-
-  #g2o-sync-button .icon {
-    font-size: 16px;
-  }
-
-  #g2o-sync-button .spinner {
-    width: 16px;
-    height: 16px;
-    border: 2px solid rgba(255,255,255,0.3);
-    border-top-color: white;
+    width: 14px;
+    height: 14px;
     border-radius: 50%;
-    animation: g2o-spin 0.8s linear infinite;
+    background: ${DOT_COLORS.idle};
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    transition: background 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.2);
   }
 
-  @keyframes g2o-spin {
-    to { transform: rotate(360deg); }
+  #g2o-dot:hover {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    transform: scale(1.2);
+  }
+
+  #g2o-dot.syncing {
+    animation: g2o-pulse ${PULSE_DURATION}ms ease-in-out infinite;
+  }
+
+  #g2o-dot.deleting {
+    animation: g2o-blink 500ms ease-in-out infinite;
+  }
+
+  @keyframes g2o-pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.85); }
+  }
+
+  @keyframes g2o-blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.15; }
+  }
+
+  #g2o-dot-tooltip {
+    position: fixed;
+    bottom: 36px;
+    right: 10px;
+    z-index: 10001;
+    background: rgba(0,0,0,0.75);
+    color: white;
+    font-size: 11px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    padding: 4px 8px;
+    border-radius: 4px;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+  }
+
+  #g2o-dot:hover + #g2o-dot-tooltip,
+  #g2o-dot-tooltip.visible {
+    opacity: 1;
   }
 
   .g2o-toast {
     position: fixed;
-    bottom: 80px;
-    right: 20px;
+    bottom: 40px;
+    right: 16px;
     z-index: 10001;
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 14px 20px;
-    border-radius: 12px;
-    font-size: 14px;
+    gap: 8px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 12px;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     box-shadow: 0 4px 16px rgba(0,0,0,0.15);
     animation: g2o-slideIn 0.3s ease;
-    max-width: 400px;
-  }
-
-  @keyframes g2o-slideIn {
-    from {
-      opacity: 0;
-      transform: translateX(100px);
-    }
-    to {
-      opacity: 1;
-      transform: translateX(0);
-    }
-  }
-
-  .g2o-toast.success {
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-    color: white;
-  }
-
-  .g2o-toast.error {
+    max-width: 360px;
     background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
     color: white;
   }
 
-  .g2o-toast.warning {
-    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-    color: white;
-  }
-
-  .g2o-toast.info {
-    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-    color: white;
-  }
-
-  .g2o-toast .icon {
-    font-size: 18px;
-    flex-shrink: 0;
+  @keyframes g2o-slideIn {
+    from { opacity: 0; transform: translateX(100px); }
+    to { opacity: 1; transform: translateX(0); }
   }
 
   .g2o-toast .message {
@@ -130,9 +135,9 @@ const STYLES = `
     color: inherit;
     opacity: 0.7;
     cursor: pointer;
-    font-size: 18px;
+    font-size: 16px;
     padding: 0;
-    margin-left: 8px;
+    margin-left: 4px;
   }
 
   .g2o-toast .close:hover {
@@ -142,6 +147,12 @@ const STYLES = `
 
 let styleInjected = false;
 let currentToast: HTMLDivElement | null = null;
+let currentStatus: DotStatus = 'idle';
+let lastErrorMessage = '';
+let syncStartTime = 0;
+let syncedTimer: ReturnType<typeof setTimeout> | null = null;
+let longPressTimer: ReturnType<typeof setTimeout> | null = null;
+let longPressTriggered = false;
 
 /**
  * Inject CSS styles into the page
@@ -157,104 +168,149 @@ function injectStyles(): void {
 }
 
 /**
- * Create and inject the sync button
+ * Create and inject the status dot indicator
+ * @param onClick - Called on normal click (sync trigger)
+ * @param onLongPress - Called after 2s long press (session exclusion)
  */
-export function injectSyncButton(onClick: () => void): HTMLButtonElement {
+export function injectStatusDot(onClick: () => void, onLongPress?: () => void): HTMLButtonElement {
   injectStyles();
 
-  // Remove existing button if present
-  const existing = document.getElementById('g2o-sync-button');
-  if (existing) {
-    existing.remove();
-  }
+  // Remove existing dot if present
+  const existing = document.getElementById('g2o-dot');
+  if (existing) existing.remove();
+  const existingTooltip = document.getElementById('g2o-dot-tooltip');
+  if (existingTooltip) existingTooltip.remove();
 
-  const button = document.createElement('button');
-  button.id = 'g2o-sync-button';
+  const dot = document.createElement('button');
+  dot.id = 'g2o-dot';
+  dot.setAttribute('aria-label', DOT_TOOLTIPS.idle);
 
-  const icon = document.createElement('span');
-  icon.className = 'icon';
-  icon.textContent = '📥';
+  const tooltip = document.createElement('div');
+  tooltip.id = 'g2o-dot-tooltip';
+  tooltip.textContent = DOT_TOOLTIPS.idle;
 
-  const text = document.createElement('span');
-  text.className = 'text';
-  text.textContent = getMessage('ui_syncButton');
+  // Long press detection via pointer events
+  const cancelLongPress = () => {
+    if (longPressTimer) {
+      clearTimeout(longPressTimer);
+      longPressTimer = null;
+    }
+  };
 
-  button.appendChild(icon);
-  button.appendChild(text);
+  dot.addEventListener('pointerdown', () => {
+    if (currentStatus === 'excluded' || currentStatus === 'deleting') return;
+    if (!onLongPress) return;
 
-  button.addEventListener('click', onClick);
-  document.body.appendChild(button);
+    longPressTriggered = false;
+    longPressTimer = setTimeout(() => {
+      longPressTriggered = true;
+      longPressTimer = null;
+      onLongPress();
+    }, LONG_PRESS_DURATION);
+  });
 
-  return button;
+  dot.addEventListener('pointerup', cancelLongPress);
+  dot.addEventListener('pointerleave', cancelLongPress);
+
+  dot.addEventListener('click', () => {
+    // Skip click if long press was triggered
+    if (longPressTriggered) {
+      longPressTriggered = false;
+      return;
+    }
+
+    if (currentStatus === 'error' && lastErrorMessage) {
+      showErrorToast(lastErrorMessage);
+    } else {
+      onClick();
+    }
+  });
+
+  document.body.appendChild(dot);
+  document.body.appendChild(tooltip);
+
+  currentStatus = 'idle';
+  return dot;
 }
 
 /**
- * Set button loading state
+ * Update the status dot to a new state
  */
-export function setButtonLoading(loading: boolean): void {
-  const button = document.getElementById('g2o-sync-button') as HTMLButtonElement | null;
-  if (!button) return;
+export function setDotStatus(status: DotStatus, errorMessage?: string): void {
+  const dot = document.getElementById('g2o-dot') as HTMLButtonElement | null;
+  const tooltip = document.getElementById('g2o-dot-tooltip');
+  if (!dot) return;
 
-  button.disabled = loading;
-
-  const icon = button.querySelector('.icon');
-  const text = button.querySelector('.text');
-
-  if (loading) {
-    if (icon) {
-      const spinner = document.createElement('div');
-      spinner.className = 'spinner';
-      icon.replaceWith(spinner);
-    }
-    if (text) text.textContent = getMessage('ui_syncing');
-  } else {
-    const spinner = button.querySelector('.spinner');
-    if (spinner) {
-      const newIcon = document.createElement('span');
-      newIcon.className = 'icon';
-      newIcon.textContent = '📥';
-      spinner.replaceWith(newIcon);
-    }
-    if (text) text.textContent = getMessage('ui_syncButton');
+  // Clear synced timer if switching away
+  if (syncedTimer && status !== 'synced') {
+    clearTimeout(syncedTimer);
+    syncedTimer = null;
   }
+
+  currentStatus = status;
+  dot.style.background = DOT_COLORS[status];
+
+  // Manage animations
+  dot.classList.remove('syncing', 'deleting');
+  if (status === 'syncing') {
+    dot.classList.add('syncing');
+    syncStartTime = Date.now();
+  } else if (status === 'deleting') {
+    dot.classList.add('deleting');
+  }
+
+  // Update tooltip
+  let tooltipText = DOT_TOOLTIPS[status];
+  if (status === 'error' && errorMessage) {
+    lastErrorMessage = errorMessage;
+    tooltipText = 'Error — click for details';
+  }
+  if (tooltip) tooltip.textContent = tooltipText;
+  dot.setAttribute('aria-label', tooltipText);
 }
 
-type ToastType = 'success' | 'error' | 'warning' | 'info';
+/**
+ * Transition from syncing → synced → watching
+ * Ensures minimum pulse count before transitioning
+ */
+export function completeSyncTransition(): void {
+  const elapsed = Date.now() - syncStartTime;
+  const minDuration = MIN_PULSE_COUNT * PULSE_DURATION;
+  const remaining = Math.max(0, minDuration - elapsed);
 
-const TOAST_ICONS: Record<ToastType, string> = {
-  success: '✅',
-  error: '❌',
-  warning: '⚠️',
-  info: 'ℹ️',
-};
+  setTimeout(() => {
+    setDotStatus('synced');
+    syncedTimer = setTimeout(() => {
+      setDotStatus('watching');
+    }, SYNCED_DISPLAY_MS);
+  }, remaining);
+}
 
 /**
- * Show a toast notification
+ * Get current dot status (for testing)
  */
-export function showToast(
-  message: string,
-  type: ToastType = 'info',
-  duration: number = DEFAULT_TOAST_DURATION
-): void {
+export function getDotStatus(): DotStatus {
+  return currentStatus;
+}
+
+/**
+ * Show error toast (only used for errors — click red dot to see)
+ */
+export function showErrorToast(error: string): void {
   injectStyles();
 
-  // Remove existing toast if present
   if (currentToast) {
     currentToast.remove();
     currentToast = null;
   }
 
   const toast = document.createElement('div');
-  toast.className = `g2o-toast ${type}`;
+  toast.className = 'g2o-toast';
   currentToast = toast;
-
-  const toastIcon = document.createElement('span');
-  toastIcon.className = 'icon';
-  toastIcon.textContent = TOAST_ICONS[type];
 
   const toastMessage = document.createElement('span');
   toastMessage.className = 'message';
-  toastMessage.textContent = message;
+  toastMessage.textContent = error;
 
   const closeBtn = document.createElement('button');
   closeBtn.className = 'close';
@@ -265,42 +321,44 @@ export function showToast(
     currentToast = null;
   });
 
-  toast.appendChild(toastIcon);
   toast.appendChild(toastMessage);
   toast.appendChild(closeBtn);
-
   document.body.appendChild(toast);
 
-  // Auto-dismiss
-  if (duration > 0) {
+  if (ERROR_TOAST_DURATION > 0) {
     setTimeout(() => {
       toast.style.animation = 'g2o-slideIn 0.3s ease reverse';
       setTimeout(() => {
         toast.remove();
-        currentToast = null;
+        if (currentToast === toast) currentToast = null;
       }, 300);
-    }, duration);
+    }, ERROR_TOAST_DURATION);
   }
 }
 
-/**
- * Show success toast with file info
- */
-export function showSuccessToast(fileName: string, isNewFile: boolean): void {
-  const messageKey = isNewFile ? 'toast_success_created' : 'toast_success_updated';
-  showToast(getMessage(messageKey, fileName), 'success', SUCCESS_TOAST_DURATION);
+// Legacy exports kept for backward compatibility with displaySaveResults
+export { showErrorToast as showWarningToast };
+export function showSuccessToast(): void {
+  /* no-op: success is shown via green dot */
+}
+export function showToast(
+  message: string,
+  type: 'success' | 'error' | 'warning' | 'info' = 'info',
+  _duration?: number
+): void {
+  if (type === 'error' || type === 'warning') {
+    showErrorToast(message);
+  }
+  // success/info: no-op — status dot handles these
 }
 
-/**
- * Show error toast with details
- */
-export function showErrorToast(error: string): void {
-  showToast(error, 'error', ERROR_TOAST_DURATION);
+// Legacy exports for backward compatibility
+export function injectSyncButton(onClick: () => void, onLongPress?: () => void): HTMLButtonElement {
+  return injectStatusDot(onClick, onLongPress);
 }
-
-/**
- * Show warning toast
- */
-export function showWarningToast(message: string): void {
-  showToast(message, 'warning', WARNING_TOAST_DURATION);
+export function setButtonLoading(loading: boolean): void {
+  if (loading) {
+    setDotStatus('syncing');
+  }
+  // Don't set watching on false — completeSyncTransition handles it
 }
