@@ -6,7 +6,7 @@
 import { getErrorMessage } from '../lib/error-utils';
 import { getSettings, migrateSettings } from '../lib/storage';
 import { validateSender, validateMessageContent } from './validation';
-import { handleSave, handleGetFile, handleTestConnection } from './obsidian-handlers';
+import { handleSave, handleGetFile, handleTestConnection, handleSaveJsonTree, handleGetJsonTree, handleDeleteSession } from './obsidian-handlers';
 import { handleMultiOutput } from './output-handlers';
 import type { ExtensionMessage } from '../lib/types';
 
@@ -81,7 +81,7 @@ async function handleMessage(message: ExtensionMessage): Promise<unknown> {
       return handleSave(settings, message.data);
 
     case 'saveToOutputs':
-      return handleMultiOutput(message.data, message.outputs, settings);
+      return handleMultiOutput(message.data, message.outputs, settings, message.conversationId);
 
     case 'getExistingFile':
       return handleGetFile(settings, message.fileName, message.vaultPath);
@@ -92,10 +92,28 @@ async function handleMessage(message: ExtensionMessage): Promise<unknown> {
     case 'getSettings':
       return settings;
 
+    case 'saveJsonTree':
+      return handleSaveJsonTree(settings, message.tree, message.vaultPath);
+
+    case 'getJsonTree':
+      return handleGetJsonTree(settings, message.conversationId, message.vaultPath);
+
+    case 'deleteSession':
+      return handleDeleteSession(settings, message.conversationId);
+
     default:
       return { success: false, error: 'Unknown action' };
   }
 }
+
+// Keep-alive: periodic alarm prevents Chrome from terminating the service worker
+const KEEPALIVE_ALARM = 'g2o-keepalive';
+chrome.alarms.create(KEEPALIVE_ALARM, { periodInMinutes: 0.5 });
+chrome.alarms.onAlarm.addListener(alarm => {
+  if (alarm.name === KEEPALIVE_ALARM) {
+    console.debug('[G2O Background] Keep-alive tick');
+  }
+});
 
 // Log when service worker starts
 console.info('[G2O Background] Service worker started');

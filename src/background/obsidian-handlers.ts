@@ -7,9 +7,12 @@
 import { ObsidianApiClient } from '../lib/obsidian-api';
 import { getErrorMessage } from '../lib/error-utils';
 import { generateNoteContent } from '../lib/note-generator';
-import { resolvePathTemplate } from '../lib/path-utils';
+import { resolvePathTemplate, buildDateVariables, sanitizeFileName } from '../lib/path-utils';
 import { lookupExistingFile, buildAppendContent } from '../lib/append-utils';
-import type { ExtensionSettings, ObsidianNote, SaveResponse } from '../lib/types';
+import { mergeTree } from '../lib/tree-builder';
+import { treeToIndentMarkdown } from '../lib/tree-to-markdown';
+import { trackSavedPaths, getSavedPaths, removeSavedPaths, addExcludedSession } from '../lib/storage';
+import type { ExtensionSettings, ObsidianNote, SaveResponse, ConversationTree } from '../lib/types';
 
 /**
  * Create an ObsidianApiClient if API key is configured.
@@ -42,7 +45,8 @@ async function tryAppendMode(
   settings: ExtensionSettings,
   note: ObsidianNote,
   fullPath: string,
-  resolvedPath: string
+  resolvedPath: string,
+  conversationId?: string
 ): Promise<SaveResponse | null> {
   if (!settings.enableAppendMode || note.frontmatter.type === 'deep-research') {
     return null;
@@ -55,6 +59,9 @@ async function tryAppendMode(
     const appendResult = buildAppendContent(lookup.content, note, settings);
     if (appendResult !== null) {
       await client.putFile(lookup.path, appendResult.content);
+      if (conversationId) {
+        await trackSavedPaths(conversationId, { md: lookup.path });
+      }
       return { success: true, isNewFile: false, messagesAppended: appendResult.messagesAppended };
     }
     return { success: true, isNewFile: false, messagesAppended: 0 };
@@ -73,7 +80,8 @@ async function tryAppendMode(
  */
 export async function handleSave(
   settings: ExtensionSettings,
-  note: ObsidianNote
+  note: ObsidianNote,
+  conversationId?: string
 ): Promise<SaveResponse> {
   const client = createObsidianClient(settings);
   if (isClientError(client)) {
@@ -81,18 +89,26 @@ export async function handleSave(
   }
 
   try {
+    // Resolve template variables (e.g., {platform} → gemini, {year} → 2026) and construct full path
     const resolvedPath = resolvePathTemplate(settings.vaultPath, {
       platform: note.frontmatter.source,
+      ...buildDateVariables(new Date()),
+      title: sanitizeFileName(note.frontmatter.title || 'untitled'),
+      sessionId: note.frontmatter.id || '',
     });
-    const fullPath = resolvedPath ? `${resolvedPath}/${note.fileName}` : note.fileName;
+    const fullPath = resolvedPath.length > 0 ? `${resolvedPath}/${note.fileName}` : note.fileName;
 
-    const appendResult = await tryAppendMode(client, settings, note, fullPath, resolvedPath);
+    const appendResult = await tryAppendMode(client, settings, note, fullPath, resolvedPath, conversationId);
     if (appendResult) return appendResult;
 
     const existingContent = await client.getFile(fullPath);
     const isNewFile = existingContent === null;
     const content = generateNoteContent(note, settings);
     await client.putFile(fullPath, content);
+
+    if (conversationId) {
+      await trackSavedPaths(conversationId, { md: fullPath });
+    }
 
     return { success: true, isNewFile };
   } catch (error) {
@@ -125,6 +141,114 @@ export async function handleGetFile(
     return { success: true, content };
   } catch (error) {
     console.error('[G2O Background] Get file failed:', error);
+    return { success: false, error: getErrorMessage(error) };
+  }
+}
+
+/**
+ * Save JSON tree to Obsidian vault
+ *
+ * Merges incoming tree with existing tree (if present) to accumulate branches.
+ * Also generates an LLM-optimized indent markdown alongside the JSON.
+ */
+export async function handleSaveJsonTree(
+  settings: ExtensionSettings,
+  tree: ConversationTree,
+  vaultPath: string
+): Promise<SaveResponse> {
+  const client = createObsidianClient(settings);
+  if (isClientError(client)) {
+    return { success: false, error: client.error };
+  }
+
+  try {
+    const resolvedPath = resolvePathTemplate(vaultPath, {
+      platform: tree.source,
+      ...buildDateVariables(new Date()),
+      title: sanitizeFileName(tree.title || 'untitled'),
+      sessionId: tree.id || '',
+    });
+    const jsonFileName = `${tree.id}.json`;
+    const llmFileName = `${tree.id}.llm.md`;
+    const jsonPath = resolvedPath.length > 0 ? `${resolvedPath}/.json/${jsonFileName}` : `.json/${jsonFileName}`;
+    const llmPath = resolvedPath.length > 0 ? `${resolvedPath}/.llm/${llmFileName}` : `.llm/${llmFileName}`;
+
+    // Load existing tree and merge
+    const existing = await client.getJSONFile<ConversationTree>(jsonPath);
+    const finalTree = existing ? mergeTree(existing, tree) : tree;
+
+    // Save JSON tree
+    await client.putJSONFile(jsonPath, finalTree);
+
+    // Generate and save LLM indent markdown
+    const llmContent = treeToIndentMarkdown(finalTree);
+    await client.putFile(llmPath, llmContent);
+
+    await trackSavedPaths(tree.id, { json: jsonPath, llm: llmPath });
+    console.info(`[G2O Background] JSON tree saved: ${jsonPath}`);
+    return { success: true, isNewFile: existing === null };
+  } catch (error) {
+    console.error('[G2O Background] JSON tree save failed:', error);
+    return { success: false, error: getErrorMessage(error) };
+  }
+}
+
+/**
+ * Get existing JSON tree from Obsidian vault
+ */
+export async function handleGetJsonTree(
+  settings: ExtensionSettings,
+  conversationId: string,
+  vaultPath: string
+): Promise<{ success: boolean; tree?: ConversationTree; error?: string }> {
+  const client = createObsidianClient(settings);
+  if (isClientError(client)) {
+    return { success: false, error: client.error };
+  }
+
+  try {
+    const jsonPath = vaultPath ? `${vaultPath}/${conversationId}.json` : `${conversationId}.json`;
+    const tree = await client.getJSONFile<ConversationTree>(jsonPath);
+    return { success: true, tree: tree ?? undefined };
+  } catch (error) {
+    console.error('[G2O Background] JSON tree get failed:', error);
+    return { success: false, error: getErrorMessage(error) };
+  }
+}
+
+/**
+ * Delete all files for a conversation and mark it as excluded.
+ * Deletes md, json, and llm files tracked via trackSavedPaths().
+ */
+export async function handleDeleteSession(
+  settings: ExtensionSettings,
+  conversationId: string
+): Promise<SaveResponse> {
+  const client = createObsidianClient(settings);
+  if (isClientError(client)) {
+    return { success: false, error: client.error };
+  }
+
+  try {
+    const paths = await getSavedPaths(conversationId);
+    const deleted: string[] = [];
+
+    if (paths) {
+      const filesToDelete = [paths.md, paths.json, paths.llm].filter(Boolean) as string[];
+      for (const filePath of filesToDelete) {
+        const wasDeleted = await client.deleteFile(filePath);
+        if (wasDeleted) deleted.push(filePath);
+      }
+      await removeSavedPaths(conversationId);
+    }
+
+    await addExcludedSession(conversationId);
+    console.info(`[G2O Background] Session excluded: ${conversationId}, deleted ${deleted.length} file(s)`);
+    return { success: true };
+  } catch (error) {
+    // Still mark as excluded even if deletion fails
+    await addExcludedSession(conversationId);
+    console.error('[G2O Background] Delete session failed:', error);
     return { success: false, error: getErrorMessage(error) };
   }
 }

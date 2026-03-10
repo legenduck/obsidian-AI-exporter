@@ -15,7 +15,7 @@ import {
   VALID_OUTPUT_DESTINATIONS,
   VALID_SOURCES,
 } from '../lib/constants';
-import type { ExtensionMessage, ObsidianNote } from '../lib/types';
+import type { ExtensionMessage, ObsidianNote, ConversationTree } from '../lib/types';
 import { containsPathTraversal } from '../lib/path-utils';
 
 /**
@@ -94,6 +94,47 @@ export function validateMessageContent(message: ExtensionMessage): boolean {
     }
   }
 
+  // Validate saveJsonTree action
+  if (message.action === 'saveJsonTree') {
+    if (!validateTreeData(message.tree)) {
+      return false;
+    }
+    if (typeof message.vaultPath !== 'string' || containsPathTraversal(message.vaultPath)) {
+      return false;
+    }
+  }
+
+  // Validate getJsonTree action
+  if (message.action === 'getJsonTree') {
+    if (typeof message.conversationId !== 'string' || message.conversationId.length === 0) {
+      return false;
+    }
+    if (typeof message.vaultPath !== 'string' || containsPathTraversal(message.vaultPath)) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+/**
+ * Validate conversation tree data structure
+ */
+export function validateTreeData(tree: ConversationTree): boolean {
+  if (!tree || typeof tree.id !== 'string' || tree.id.length === 0) {
+    return false;
+  }
+  if (typeof tree.source !== 'string' || !VALID_SOURCES.includes(tree.source as (typeof VALID_SOURCES)[number])) {
+    return false;
+  }
+  if (!tree.tree || typeof tree.tree !== 'object') {
+    return false;
+  }
+  // Content size limit (DoS prevention)
+  const serialized = JSON.stringify(tree);
+  if (serialized.length > MAX_CONTENT_SIZE) {
+    return false;
+  }
   return true;
 }
 

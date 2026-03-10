@@ -258,6 +258,83 @@ export class ObsidianApiClient {
   }
 
   /**
+   * Get JSON file content from vault
+   * @param path - Path relative to vault root (e.g., "AI/json/claude/abc12345.json")
+   * @returns Parsed JSON object, or null if file doesn't exist
+   */
+  async getJSONFile<T>(path: string): Promise<T | null> {
+    const content = await this.getFile(path);
+    if (content === null) return null;
+    try {
+      return JSON.parse(content) as T;
+    } catch {
+      console.warn(`[ObsidianAPI] Invalid JSON in ${path}, treating as absent`);
+      return null;
+    }
+  }
+
+  /**
+   * Create or update JSON file in vault
+   * @param path - Path relative to vault root
+   * @param data - Object to serialize as JSON
+   */
+  async putJSONFile<T>(path: string, data: T): Promise<void> {
+    const content = JSON.stringify(data, null, 2);
+    try {
+      const encodedPath = encodeURIComponent(path);
+      const response = await fetch(`${this.baseUrl}/vault/${encodedPath}`, {
+        method: 'PUT',
+        headers: {
+          ...this.getHeaders(),
+          'Content-Type': 'application/json',
+        },
+        body: content,
+        signal: createTimeoutSignal(DEFAULT_API_TIMEOUT),
+      });
+
+      if (!response.ok) {
+        throw this.createError(response.status, `Failed to save JSON file: ${response.statusText}`);
+      }
+    } catch (error) {
+      if (isNetworkError(error)) {
+        throw this.createError(0, 'Request timed out. Please check your connection.');
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * Delete a file from vault
+   * @param path - Path relative to vault root
+   * @returns true if deleted, false if file didn't exist (404)
+   */
+  async deleteFile(path: string): Promise<boolean> {
+    try {
+      const encodedPath = encodeURIComponent(path);
+      const response = await fetch(`${this.baseUrl}/vault/${encodedPath}`, {
+        method: 'DELETE',
+        headers: this.getHeaders(),
+        signal: createTimeoutSignal(DEFAULT_API_TIMEOUT),
+      });
+
+      if (response.status === 404) {
+        return false;
+      }
+
+      if (!response.ok) {
+        throw this.createError(response.status, `Failed to delete file: ${response.statusText}`);
+      }
+
+      return true;
+    } catch (error) {
+      if (isNetworkError(error)) {
+        throw this.createError(0, 'Request timed out. Please check your connection.');
+      }
+      throw error;
+    }
+  }
+
+  /**
    * Create an API error
    */
   private createError(status: number, message: string): ObsidianApiError {

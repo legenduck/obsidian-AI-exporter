@@ -66,10 +66,11 @@ async function ensureOffscreenDocument(): Promise<void> {
  */
 async function handleSaveToObsidian(
   note: ObsidianNote,
-  settings: ExtensionSettings
+  settings: ExtensionSettings,
+  conversationId?: string
 ): Promise<OutputResult & { messagesAppended?: number }> {
   try {
-    const result = await handleSave(settings, note);
+    const result = await handleSave(settings, note, conversationId);
     return {
       destination: 'obsidian',
       success: result.success,
@@ -193,15 +194,22 @@ async function handleCopyToClipboard(
 async function executeOutput(
   dest: OutputDestination,
   note: ObsidianNote,
-  settings: ExtensionSettings
+  settings: ExtensionSettings,
+  conversationId?: string
 ): Promise<OutputResult> {
   switch (dest) {
     case 'obsidian':
-      return handleSaveToObsidian(note, settings);
+      return handleSaveToObsidian(note, settings, conversationId);
     case 'file':
       return handleDownloadToFile(note, settings);
     case 'clipboard':
       return handleCopyToClipboard(note, settings);
+    case 'json':
+      // JSON tree export is handled via a separate saveJsonTree pipeline,
+      // not through multi-output. Return success to avoid false errors.
+      return { destination: 'json', success: true };
+    default:
+      return { destination: dest, success: false, error: `Unsupported output: ${dest}` };
   }
 }
 
@@ -212,9 +220,10 @@ async function executeOutput(
 export async function handleMultiOutput(
   note: ObsidianNote,
   outputs: OutputDestination[],
-  settings: ExtensionSettings
+  settings: ExtensionSettings,
+  conversationId?: string
 ): Promise<MultiOutputResponse> {
-  const promises = outputs.map(dest => executeOutput(dest, note, settings));
+  const promises = outputs.map(dest => executeOutput(dest, note, settings, conversationId));
 
   // Promise.allSettled: one failure does not block others
   const settled = await Promise.allSettled(promises);
