@@ -4,122 +4,122 @@
     "description": "Extension name shown in browser"
   },
   "extDescription": {
-    "message": "Auto-sync AI conversations from Gemini, Claude, ChatGPT, and Perplexity to Obsidian",
+    "message": "Sincroniza automáticamente conversaciones de IA de Gemini, Claude, ChatGPT y Perplexity con Obsidian",
     "description": "Extension description shown in browser and store"
   },
 
   "ui_syncButton": {
-    "message": "Sync to Obsidian",
+    "message": "Sincronizar con Obsidian",
     "description": "Text on the floating sync button"
   },
   "ui_syncing": {
-    "message": "Syncing...",
+    "message": "Sincronizando...",
     "description": "Text shown while syncing"
   },
 
   "settings_title": {
-    "message": "Settings",
+    "message": "Configuración",
     "description": "Settings page title"
   },
   "settings_apiKey": {
-    "message": "Obsidian API Key",
+    "message": "Clave API de Obsidian",
     "description": "Label for API key input"
   },
   "settings_apiKeyPlaceholder": {
-    "message": "Enter your Local REST API key",
+    "message": "Ingrese su clave de Local REST API",
     "description": "Placeholder for API key input"
   },
   "settings_port": {
-    "message": "Port",
+    "message": "Puerto",
     "description": "Label for port input"
   },
   "settings_vaultPath": {
-    "message": "Vault Path",
+    "message": "Ruta del Vault",
     "description": "Label for vault path input"
   },
   "settings_vaultPathPlaceholder": {
-    "message": "e.g., AI/{platform}",
+    "message": "ej., AI/{platform}",
     "description": "Placeholder for vault path input"
   },
   "settings_advancedSettings": {
-    "message": "Advanced Settings",
+    "message": "Configuración avanzada",
     "description": "Collapsible section title for advanced settings"
   },
   "settings_vaultPathHelp": {
-    "message": "Use {platform} to auto-organize by source (gemini, claude, chatgpt, perplexity)",
+    "message": "Use {platform} para organizar automáticamente por fuente (gemini, claude, chatgpt, perplexity)",
     "description": "Help text explaining template variable for vault path"
   },
   "settings_messageFormat": {
-    "message": "Message Format",
+    "message": "Formato de mensaje",
     "description": "Label for message format select"
   },
   "settings_format_callout": {
-    "message": "Callout (Recommended)",
+    "message": "Callout (Recomendado)",
     "description": "Callout format option"
   },
   "settings_format_blockquote": {
-    "message": "Blockquote",
+    "message": "Cita",
     "description": "Blockquote format option"
   },
   "settings_format_plain": {
-    "message": "Plain",
+    "message": "Texto plano",
     "description": "Plain format option"
   },
   "settings_userCallout": {
-    "message": "User Callout Type",
+    "message": "Tipo de Callout del usuario",
     "description": "Label for user callout type"
   },
   "settings_assistantCallout": {
-    "message": "Assistant Callout Type",
+    "message": "Tipo de Callout del asistente",
     "description": "Label for assistant callout type"
   },
   "settings_frontmatter": {
-    "message": "Frontmatter Options",
+    "message": "Opciones de Frontmatter",
     "description": "Section title for frontmatter options"
   },
   "settings_includeId": {
-    "message": "Include ID",
+    "message": "Incluir ID",
     "description": "Checkbox label for include ID"
   },
   "settings_includeTitle": {
-    "message": "Include Title",
+    "message": "Incluir título",
     "description": "Checkbox label for include title"
   },
   "settings_includeTags": {
-    "message": "Include Tags",
+    "message": "Incluir etiquetas",
     "description": "Checkbox label for include tags"
   },
   "settings_includeSource": {
-    "message": "Include Source & URL",
+    "message": "Incluir fuente y URL",
     "description": "Checkbox label for include source"
   },
   "settings_includeDates": {
-    "message": "Include Dates",
+    "message": "Incluir fechas",
     "description": "Checkbox label for include dates"
   },
   "settings_includeMessageCount": {
-    "message": "Include Message Count",
+    "message": "Incluir cantidad de mensajes",
     "description": "Checkbox label for include message count"
   },
   "settings_testConnection": {
-    "message": "Test Connection",
+    "message": "Probar conexión",
     "description": "Test connection button text"
   },
   "settings_save": {
-    "message": "Save Settings",
+    "message": "Guardar configuración",
     "description": "Save button text"
   },
   "settings_showApiKey": {
-    "message": "Show API key",
+    "message": "Mostrar clave API",
     "description": "Tooltip for show API key button"
   },
   "settings_hideApiKey": {
-    "message": "Hide API key",
+    "message": "Ocultar clave API",
     "description": "Tooltip for hide API key button"
   },
 
   "toast_success_created": {
-    "message": "Created: $FILE$",
+    "message": "Creado: $FILE$",
     "description": "Success message when file is created",
     "placeholders": {
       "file": {
@@ -129,7 +129,7 @@
     }
   },
   "toast_success_updated": {
-    "message": "Updated: $FILE$",
+    "message": "Actualizado: $FILE$",
     "description": "Success message when file is updated",
     "placeholders": {
       "file": {
@@ -139,19 +139,19 @@
     }
   },
   "toast_error_noApiKey": {
-    "message": "Please configure your Obsidian API key in the extension settings",
+    "message": "Configure su clave API de Obsidian en la configuración de la extensión",
     "description": "Error when API key is not set"
   },
   "toast_error_connectionFailed": {
-    "message": "Cannot connect to Obsidian. Is it running?",
+    "message": "No se puede conectar a Obsidian. ¿Está en ejecución?",
     "description": "Error when connection fails"
   },
   "toast_error_extractionFailed": {
-    "message": "Failed to extract conversation",
+    "message": "Error al extraer la conversación",
     "description": "Error when extraction fails"
   },
   "toast_error_saveFailed": {
-    "message": "Failed to save: $ERROR$",
+    "message": "Error al guardar: $ERROR$",
     "description": "Error when save fails",
     "placeholders": {
       "error": {
@@ -161,74 +161,74 @@
     }
   },
   "toast_info_extracting": {
-    "message": "Extracting conversation...",
+    "message": "Extrayendo conversación...",
     "description": "Info message during extraction"
   },
   "toast_info_saving": {
-    "message": "Saving to Obsidian...",
+    "message": "Guardando en Obsidian...",
     "description": "Info message during save"
   },
   "toast_warning_partial": {
-    "message": "Some content may not have been extracted",
+    "message": "Es posible que parte del contenido no se haya extraído",
     "description": "Warning when partial extraction"
   },
 
   "error_invalidApiKey": {
-    "message": "Invalid API key format",
+    "message": "Formato de clave API no válido",
     "description": "Error for invalid API key"
   },
   "error_apiKeyTooShort": {
-    "message": "API key is too short (minimum 16 characters)",
+    "message": "La clave API es demasiado corta (mínimo 16 caracteres)",
     "description": "Error for short API key"
   },
   "error_apiKeyRequired": {
-    "message": "API key is required",
+    "message": "La clave API es obligatoria",
     "description": "Error when API key is empty"
   },
   "error_invalidVaultPath": {
-    "message": "Vault path contains invalid characters",
+    "message": "La ruta del Vault contiene caracteres no válidos",
     "description": "Error for invalid vault path"
   },
   "error_pathTraversal": {
-    "message": "Path traversal detected in vault path",
+    "message": "Se detectó un recorrido de ruta en la ruta del Vault",
     "description": "Error for path traversal attempt"
   },
   "error_vaultPathTooLong": {
-    "message": "Vault path is too long (max 200 characters)",
+    "message": "La ruta del Vault es demasiado larga (máximo 200 caracteres)",
     "description": "Error for long vault path"
   },
   "error_connectionTimeout": {
-    "message": "Connection timed out. Please check your settings.",
+    "message": "La conexión ha expirado. Verifique su configuración.",
     "description": "Error for connection timeout"
   },
   "error_obsidianNotRunning": {
-    "message": "Obsidian REST API is not running. Please ensure Obsidian is open and the Local REST API plugin is enabled.",
+    "message": "Obsidian REST API no está en ejecución. Asegúrese de que Obsidian esté abierto y el complemento Local REST API esté habilitado.",
     "description": "Error when Obsidian is not running"
   },
   "error_invalidPort": {
-    "message": "Port must be between 1024 and 65535",
+    "message": "El puerto debe estar entre 1024 y 65535",
     "description": "Error for invalid port"
   },
 
   "status_connectionSuccess": {
-    "message": "Connection successful!",
+    "message": "¡Conexión exitosa!",
     "description": "Success status for connection test"
   },
   "status_settingsSaved": {
-    "message": "Settings saved successfully!",
+    "message": "¡Configuración guardada!",
     "description": "Success status for settings save"
   },
   "status_testing": {
-    "message": "Testing connection...",
+    "message": "Probando conexión...",
     "description": "Status while testing connection"
   },
 
   "settings_outputDestinations": {
-    "message": "Output Destinations",
+    "message": "Destinos de salida",
     "description": "Section title for output destinations"
   },
   "settings_outputHelp": {
-    "message": "Select where to save conversations",
+    "message": "Seleccione dónde guardar las conversaciones",
     "description": "Help text for output destinations"
   },
   "settings_outputObsidian": {
@@ -236,19 +236,19 @@
     "description": "Obsidian output option"
   },
   "settings_outputFile": {
-    "message": "Download File",
+    "message": "Descargar archivo",
     "description": "File download output option"
   },
   "settings_outputClipboard": {
-    "message": "Copy to Clipboard",
+    "message": "Copiar al portapapeles",
     "description": "Clipboard output option"
   },
   "success_allOutputs": {
-    "message": "Saved to all destinations",
+    "message": "Guardado en todos los destinos",
     "description": "Success message when all outputs succeed"
   },
   "success_partialOutputs": {
-    "message": "Partial success: $DETAILS$",
+    "message": "Éxito parcial: $DETAILS$",
     "description": "Warning message for partial success",
     "placeholders": {
       "details": {
@@ -258,35 +258,35 @@
     }
   },
   "error_noOutputSelected": {
-    "message": "Please select at least one output destination",
+    "message": "Seleccione al menos un destino de salida",
     "description": "Error when no output is selected"
   },
   "error_allOutputsFailed": {
-    "message": "Failed to save",
+    "message": "Error al guardar",
     "description": "Error when all outputs fail"
   },
   "tooltip_obsidianDisabled": {
-    "message": "Enable Obsidian output to configure",
+    "message": "Habilite la salida de Obsidian para configurar",
     "description": "Tooltip when Obsidian settings are disabled"
   },
   "error_downloadCanceled": {
-    "message": "Download was canceled",
+    "message": "La descarga fue cancelada",
     "description": "Error when download is canceled"
   },
   "error_networkError": {
-    "message": "Network error occurred",
+    "message": "Se produjo un error de red",
     "description": "Error for network issues"
   },
   "error_permissionDenied": {
-    "message": "Permission denied",
+    "message": "Permiso denegado",
     "description": "Error for permission issues"
   },
   "error_clipboardFailed": {
-    "message": "Failed to copy to clipboard",
+    "message": "Error al copiar al portapapeles",
     "description": "Error when clipboard copy fails"
   },
   "error_outputFailed": {
-    "message": "Failed to save to $OUTPUT$",
+    "message": "Error al guardar en $OUTPUT$",
     "description": "Error for specific output failure",
     "placeholders": {
       "output": {
@@ -300,33 +300,33 @@
     "description": "Obsidian output name"
   },
   "output_file": {
-    "message": "file",
+    "message": "archivo",
     "description": "File output name"
   },
   "output_clipboard": {
-    "message": "clipboard",
+    "message": "portapapeles",
     "description": "Clipboard output name"
   },
 
   "settings_enableAppendMode": {
-    "message": "Append Mode",
+    "message": "Modo de adición",
     "description": "Label for append mode toggle"
   },
   "settings_appendModeHelp": {
-    "message": "Only add new messages to existing notes",
+    "message": "Solo agregar mensajes nuevos a las notas existentes",
     "description": "Help text for append mode toggle"
   },
   "settings_enableToolContent": {
-    "message": "Include tool/search results",
+    "message": "Incluir resultados de herramientas/búsqueda",
     "description": "Label for tool content toggle"
   },
   "settings_toolContentHelp": {
-    "message": "Save web search and tool results from Claude",
+    "message": "Guardar resultados de búsqueda web y herramientas de Claude",
     "description": "Help text for tool content toggle"
   },
 
   "toast_appended": {
-    "message": "$COUNT$ new message(s) appended",
+    "message": "$COUNT$ mensaje(s) nuevo(s) agregado(s)",
     "description": "Toast when messages are appended",
     "placeholders": {
       "count": {
@@ -336,7 +336,7 @@
     }
   },
   "toast_noNewMessages": {
-    "message": "No new messages to append",
+    "message": "No hay mensajes nuevos para agregar",
     "description": "Toast when no new messages found"
   }
 }

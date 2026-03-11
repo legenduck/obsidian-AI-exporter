@@ -4,122 +4,122 @@
     "description": "Extension name shown in browser"
   },
   "extDescription": {
-    "message": "Auto-sync AI conversations from Gemini, Claude, ChatGPT, and Perplexity to Obsidian",
+    "message": "Gemini, Claude, ChatGPT, Perplexity의 AI 대화를 Obsidian에 자동 동기화",
     "description": "Extension description shown in browser and store"
   },
 
   "ui_syncButton": {
-    "message": "Sync to Obsidian",
+    "message": "Obsidian에 동기화",
     "description": "Text on the floating sync button"
   },
   "ui_syncing": {
-    "message": "Syncing...",
+    "message": "동기화 중...",
     "description": "Text shown while syncing"
   },
 
   "settings_title": {
-    "message": "Settings",
+    "message": "설정",
     "description": "Settings page title"
   },
   "settings_apiKey": {
-    "message": "Obsidian API Key",
+    "message": "Obsidian API 키",
     "description": "Label for API key input"
   },
   "settings_apiKeyPlaceholder": {
-    "message": "Enter your Local REST API key",
+    "message": "Local REST API 키를 입력하세요",
     "description": "Placeholder for API key input"
   },
   "settings_port": {
-    "message": "Port",
+    "message": "포트",
     "description": "Label for port input"
   },
   "settings_vaultPath": {
-    "message": "Vault Path",
+    "message": "Vault 경로",
     "description": "Label for vault path input"
   },
   "settings_vaultPathPlaceholder": {
-    "message": "e.g., AI/{platform}",
+    "message": "예: AI/{platform}",
     "description": "Placeholder for vault path input"
   },
   "settings_advancedSettings": {
-    "message": "Advanced Settings",
+    "message": "고급 설정",
     "description": "Collapsible section title for advanced settings"
   },
   "settings_vaultPathHelp": {
-    "message": "Use {platform} to auto-organize by source (gemini, claude, chatgpt, perplexity)",
+    "message": "{platform}을 사용하여 소스별로 자동 분류 (gemini, claude, chatgpt, perplexity)",
     "description": "Help text explaining template variable for vault path"
   },
   "settings_messageFormat": {
-    "message": "Message Format",
+    "message": "메시지 형식",
     "description": "Label for message format select"
   },
   "settings_format_callout": {
-    "message": "Callout (Recommended)",
+    "message": "Callout (권장)",
     "description": "Callout format option"
   },
   "settings_format_blockquote": {
-    "message": "Blockquote",
+    "message": "인용문",
     "description": "Blockquote format option"
   },
   "settings_format_plain": {
-    "message": "Plain",
+    "message": "일반 텍스트",
     "description": "Plain format option"
   },
   "settings_userCallout": {
-    "message": "User Callout Type",
+    "message": "사용자 Callout 유형",
     "description": "Label for user callout type"
   },
   "settings_assistantCallout": {
-    "message": "Assistant Callout Type",
+    "message": "어시스턴트 Callout 유형",
     "description": "Label for assistant callout type"
   },
   "settings_frontmatter": {
-    "message": "Frontmatter Options",
+    "message": "Frontmatter 옵션",
     "description": "Section title for frontmatter options"
   },
   "settings_includeId": {
-    "message": "Include ID",
+    "message": "ID 포함",
     "description": "Checkbox label for include ID"
   },
   "settings_includeTitle": {
-    "message": "Include Title",
+    "message": "제목 포함",
     "description": "Checkbox label for include title"
   },
   "settings_includeTags": {
-    "message": "Include Tags",
+    "message": "태그 포함",
     "description": "Checkbox label for include tags"
   },
   "settings_includeSource": {
-    "message": "Include Source & URL",
+    "message": "소스 및 URL 포함",
     "description": "Checkbox label for include source"
   },
   "settings_includeDates": {
-    "message": "Include Dates",
+    "message": "날짜 포함",
     "description": "Checkbox label for include dates"
   },
   "settings_includeMessageCount": {
-    "message": "Include Message Count",
+    "message": "메시지 수 포함",
     "description": "Checkbox label for include message count"
   },
   "settings_testConnection": {
-    "message": "Test Connection",
+    "message": "연결 테스트",
     "description": "Test connection button text"
   },
   "settings_save": {
-    "message": "Save Settings",
+    "message": "설정 저장",
     "description": "Save button text"
   },
   "settings_showApiKey": {
-    "message": "Show API key",
+    "message": "API 키 표시",
     "description": "Tooltip for show API key button"
   },
   "settings_hideApiKey": {
-    "message": "Hide API key",
+    "message": "API 키 숨기기",
     "description": "Tooltip for hide API key button"
   },
 
   "toast_success_created": {
-    "message": "Created: $FILE$",
+    "message": "생성됨: $FILE$",
     "description": "Success message when file is created",
     "placeholders": {
       "file": {
@@ -129,7 +129,7 @@
     }
   },
   "toast_success_updated": {
-    "message": "Updated: $FILE$",
+    "message": "업데이트됨: $FILE$",
     "description": "Success message when file is updated",
     "placeholders": {
       "file": {
@@ -139,19 +139,19 @@
     }
   },
   "toast_error_noApiKey": {
-    "message": "Please configure your Obsidian API key in the extension settings",
+    "message": "확장 프로그램 설정에서 Obsidian API 키를 설정해 주세요",
     "description": "Error when API key is not set"
   },
   "toast_error_connectionFailed": {
-    "message": "Cannot connect to Obsidian. Is it running?",
+    "message": "Obsidian에 연결할 수 없습니다. 실행 중인지 확인해 주세요.",
     "description": "Error when connection fails"
   },
   "toast_error_extractionFailed": {
-    "message": "Failed to extract conversation",
+    "message": "대화 추출에 실패했습니다",
     "description": "Error when extraction fails"
   },
   "toast_error_saveFailed": {
-    "message": "Failed to save: $ERROR$",
+    "message": "저장 실패: $ERROR$",
     "description": "Error when save fails",
     "placeholders": {
       "error": {
@@ -161,74 +161,74 @@
     }
   },
   "toast_info_extracting": {
-    "message": "Extracting conversation...",
+    "message": "대화 추출 중...",
     "description": "Info message during extraction"
   },
   "toast_info_saving": {
-    "message": "Saving to Obsidian...",
+    "message": "Obsidian에 저장 중...",
     "description": "Info message during save"
   },
   "toast_warning_partial": {
-    "message": "Some content may not have been extracted",
+    "message": "일부 콘텐츠가 추출되지 않았을 수 있습니다",
     "description": "Warning when partial extraction"
   },
 
   "error_invalidApiKey": {
-    "message": "Invalid API key format",
+    "message": "잘못된 API 키 형식입니다",
     "description": "Error for invalid API key"
   },
   "error_apiKeyTooShort": {
-    "message": "API key is too short (minimum 16 characters)",
+    "message": "API 키가 너무 짧습니다 (최소 16자)",
     "description": "Error for short API key"
   },
   "error_apiKeyRequired": {
-    "message": "API key is required",
+    "message": "API 키가 필요합니다",
     "description": "Error when API key is empty"
   },
   "error_invalidVaultPath": {
-    "message": "Vault path contains invalid characters",
+    "message": "Vault 경로에 잘못된 문자가 포함되어 있습니다",
     "description": "Error for invalid vault path"
   },
   "error_pathTraversal": {
-    "message": "Path traversal detected in vault path",
+    "message": "Vault 경로에서 경로 탐색이 감지되었습니다",
     "description": "Error for path traversal attempt"
   },
   "error_vaultPathTooLong": {
-    "message": "Vault path is too long (max 200 characters)",
+    "message": "Vault 경로가 너무 깁니다 (최대 200자)",
     "description": "Error for long vault path"
   },
   "error_connectionTimeout": {
-    "message": "Connection timed out. Please check your settings.",
+    "message": "연결 시간이 초과되었습니다. 설정을 확인해 주세요.",
     "description": "Error for connection timeout"
   },
   "error_obsidianNotRunning": {
-    "message": "Obsidian REST API is not running. Please ensure Obsidian is open and the Local REST API plugin is enabled.",
+    "message": "Obsidian REST API가 실행되고 있지 않습니다. Obsidian이 열려 있고 Local REST API 플러그인이 활성화되어 있는지 확인해 주세요.",
     "description": "Error when Obsidian is not running"
   },
   "error_invalidPort": {
-    "message": "Port must be between 1024 and 65535",
+    "message": "포트는 1024에서 65535 사이여야 합니다",
     "description": "Error for invalid port"
   },
 
   "status_connectionSuccess": {
-    "message": "Connection successful!",
+    "message": "연결 성공!",
     "description": "Success status for connection test"
   },
   "status_settingsSaved": {
-    "message": "Settings saved successfully!",
+    "message": "설정이 저장되었습니다!",
     "description": "Success status for settings save"
   },
   "status_testing": {
-    "message": "Testing connection...",
+    "message": "연결 테스트 중...",
     "description": "Status while testing connection"
   },
 
   "settings_outputDestinations": {
-    "message": "Output Destinations",
+    "message": "출력 대상",
     "description": "Section title for output destinations"
   },
   "settings_outputHelp": {
-    "message": "Select where to save conversations",
+    "message": "대화를 저장할 위치를 선택하세요",
     "description": "Help text for output destinations"
   },
   "settings_outputObsidian": {
@@ -236,19 +236,19 @@
     "description": "Obsidian output option"
   },
   "settings_outputFile": {
-    "message": "Download File",
+    "message": "파일 다운로드",
     "description": "File download output option"
   },
   "settings_outputClipboard": {
-    "message": "Copy to Clipboard",
+    "message": "클립보드에 복사",
     "description": "Clipboard output option"
   },
   "success_allOutputs": {
-    "message": "Saved to all destinations",
+    "message": "모든 대상에 저장 완료",
     "description": "Success message when all outputs succeed"
   },
   "success_partialOutputs": {
-    "message": "Partial success: $DETAILS$",
+    "message": "부분 성공: $DETAILS$",
     "description": "Warning message for partial success",
     "placeholders": {
       "details": {
@@ -258,35 +258,35 @@
     }
   },
   "error_noOutputSelected": {
-    "message": "Please select at least one output destination",
+    "message": "하나 이상의 출력 대상을 선택해 주세요",
     "description": "Error when no output is selected"
   },
   "error_allOutputsFailed": {
-    "message": "Failed to save",
+    "message": "저장에 실패했습니다",
     "description": "Error when all outputs fail"
   },
   "tooltip_obsidianDisabled": {
-    "message": "Enable Obsidian output to configure",
+    "message": "설정하려면 Obsidian 출력을 활성화하세요",
     "description": "Tooltip when Obsidian settings are disabled"
   },
   "error_downloadCanceled": {
-    "message": "Download was canceled",
+    "message": "다운로드가 취소되었습니다",
     "description": "Error when download is canceled"
   },
   "error_networkError": {
-    "message": "Network error occurred",
+    "message": "네트워크 오류가 발생했습니다",
     "description": "Error for network issues"
   },
   "error_permissionDenied": {
-    "message": "Permission denied",
+    "message": "권한이 거부되었습니다",
     "description": "Error for permission issues"
   },
   "error_clipboardFailed": {
-    "message": "Failed to copy to clipboard",
+    "message": "클립보드에 복사하지 못했습니다",
     "description": "Error when clipboard copy fails"
   },
   "error_outputFailed": {
-    "message": "Failed to save to $OUTPUT$",
+    "message": "$OUTPUT$에 저장하지 못했습니다",
     "description": "Error for specific output failure",
     "placeholders": {
       "output": {
@@ -300,33 +300,33 @@
     "description": "Obsidian output name"
   },
   "output_file": {
-    "message": "file",
+    "message": "파일",
     "description": "File output name"
   },
   "output_clipboard": {
-    "message": "clipboard",
+    "message": "클립보드",
     "description": "Clipboard output name"
   },
 
   "settings_enableAppendMode": {
-    "message": "Append Mode",
+    "message": "추가 모드",
     "description": "Label for append mode toggle"
   },
   "settings_appendModeHelp": {
-    "message": "Only add new messages to existing notes",
+    "message": "기존 노트에 새 메시지만 추가",
     "description": "Help text for append mode toggle"
   },
   "settings_enableToolContent": {
-    "message": "Include tool/search results",
+    "message": "도구/검색 결과 포함",
     "description": "Label for tool content toggle"
   },
   "settings_toolContentHelp": {
-    "message": "Save web search and tool results from Claude",
+    "message": "Claude의 웹 검색 및 도구 결과를 저장",
     "description": "Help text for tool content toggle"
   },
 
   "toast_appended": {
-    "message": "$COUNT$ new message(s) appended",
+    "message": "$COUNT$개의 새 메시지가 추가됨",
     "description": "Toast when messages are appended",
     "placeholders": {
       "count": {
@@ -336,7 +336,7 @@
     }
   },
   "toast_noNewMessages": {
-    "message": "No new messages to append",
+    "message": "추가할 새 메시지가 없습니다",
     "description": "Toast when no new messages found"
   }
 }

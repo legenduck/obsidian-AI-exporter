@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Chrome Extension that extracts AI conversations from Google Gemini, Claude AI, ChatGPT, and Perplexity and saves them to Obsidian via the Local REST API. Built with CRXJS + Vite + TypeScript.
+Obsidian Chat Sync — Chrome Extension that auto-syncs AI conversations from Google Gemini, Claude AI, ChatGPT, and Perplexity to Obsidian via the Local REST API. Built with CRXJS + Vite + TypeScript. Forked from [sho7650/obsidian-AI-exporter](https://github.com/sho7650/obsidian-AI-exporter).
 
 ## ⚠️ Absolute Rules
 

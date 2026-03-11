@@ -1,32 +1,27 @@
-# Obsidian AI Exporter
+# Obsidian Chat Sync
 
-> Fork of [sho7650/obsidian-AI-exporter](https://github.com/sho7650/obsidian-AI-exporter) — added auto-sync, JSON tree export, session exclusion, and status dot indicator.
+[日本語](README.ja.md) | [한국어](README.ko.md) | [简体中文](README.zh-CN.md) | [繁體中文](README.zh-TW.md) | [Español](README.es.md) | [Français](README.fr.md) | [Deutsch](README.de.md)
 
-Chrome Extension that exports AI conversations from Google Gemini, Claude AI, ChatGPT, and Perplexity to Obsidian via the Local REST API.
+Auto-sync AI conversations from Google Gemini, Claude AI, ChatGPT, and Perplexity to your Obsidian vault.
 
-[日本語版はこちら](README.ja.md)
+> Based on [sho7650/obsidian-AI-exporter](https://github.com/sho7650/obsidian-AI-exporter)
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Chrome Web Store](https://img.shields.io/badge/Chrome-Extension-blue)](https://chromewebstore.google.com/detail/obsidian-ai-exporter/edemgeigfbodiehkjhjflleipabgbdeh)
 
 ## Features
 
-- **Multi-platform support**: Export from Google Gemini, Claude AI, ChatGPT, and Perplexity
-- **Status indicator**: Color-coded dot shows sync state (idle/watching/syncing/synced/error)
-- **Auto-sync**: Automatically syncs when new messages appear via MutationObserver
-- **Multiple output options**: Save to Obsidian, download as file, or copy to clipboard
+- **Auto-sync**: Automatically syncs conversations as new messages appear via MutationObserver
+- **Status indicator**: Color-coded dot shows sync state (idle / watching / syncing / synced / error / excluded)
+- **Multi-platform**: Google Gemini, Claude AI, ChatGPT, and Perplexity
 - **JSON Tree Export**: Save conversation branches as JSON tree with LLM-optimized markdown
 - **Session exclusion**: Long-press (2s) the indicator to exclude a session and delete its files
-- **Deep Research support**: Export Gemini Deep Research and Claude Extended Thinking reports
+- **Deep Research**: Export Gemini Deep Research and Claude Extended Thinking reports
 - **Artifact support**: Extract Claude Artifacts with inline citations and sources
-- **Tool content support**: Optionally include Claude's web search results and tool activity as collapsible `[!ABSTRACT]` callouts
+- **Tool content**: Optionally include Claude's web search results as collapsible callouts
 - **Append mode**: Only new messages are added to existing notes
-- **Obsidian callouts**: Formatted output with `[!QUESTION]` and `[!NOTE]` callouts
-- **YAML frontmatter**: Metadata including title, source, URL, dates, and tags
-- **Auto-scroll**: Automatically loads all messages in long Gemini conversations
 - **Path templates**: Use `{platform}`, `{year}`, `{month}`, `{weekday}`, `{title}`, `{sessionId}` in vault path
-- **Configurable**: Customizable vault path, template options, and frontmatter fields
-- **Localized**: English and Japanese UI support
+- **Multiple outputs**: Save to Obsidian, download as file, or copy to clipboard
+- **Obsidian callouts**: Formatted with `[!QUESTION]` and `[!NOTE]` callouts + YAML frontmatter
 
 ## Requirements
 
@@ -36,55 +31,40 @@ Chrome Extension that exports AI conversations from Google Gemini, Claude AI, Ch
 
 ## Installation
 
-### From Chrome Web Store
-
-> **Note**: Currently under review. The link will be active once approved.
-
-[Install from Chrome Web Store](https://chromewebstore.google.com/detail/obsidian-ai-exporter/edemgeigfbodiehkjhjflleipabgbdeh)
-
-### From Source
-
 1. Clone this repository:
    ```bash
-   git clone https://github.com/sho7650/obsidian-AI-exporter.git
-   cd obsidian-AI-exporter
+   git clone https://github.com/legenduck/obsidian-chat-sync.git
+   cd obsidian-chat-sync
    ```
 
-2. Install dependencies:
+2. Install dependencies and build:
    ```bash
    npm install
-   ```
-
-3. Build the extension:
-   ```bash
    npm run build
    ```
 
-4. Load in Chrome:
+3. Load in Chrome:
    - Navigate to `chrome://extensions`
    - Enable "Developer mode"
    - Click "Load unpacked"
    - Select the `dist/` folder
 
-### Setup Obsidian
+## Setup
 
 1. Install the [Local REST API](https://github.com/coddingtonbear/obsidian-local-rest-api) plugin in Obsidian
 2. Enable the plugin and copy your API key
 3. Click the extension icon in Chrome and enter:
    - **API Key**: Your Local REST API key
    - **Port**: Default is `27123`
-   - **Vault Path**: Folder path in your vault (e.g., `AI/{platform}` to auto-organize by source)
+   - **Vault Path**: Folder path in your vault (e.g., `AI/{platform}`)
 
 ## Usage
 
-### Basic Usage
+### Basic
 
-1. Open a conversation on any supported platform ([Gemini](https://gemini.google.com), [Claude](https://claude.ai), [ChatGPT](https://chatgpt.com), [Perplexity](https://www.perplexity.ai))
+1. Open a conversation on any supported platform
 2. A small status dot appears in the bottom-right corner
-3. Click the dot to sync the conversation to your configured outputs:
-   - **Obsidian** (default): Saved directly to your vault via Local REST API
-   - **File**: Downloaded as a Markdown file
-   - **Clipboard**: Copied to clipboard for pasting anywhere
+3. Click the dot to sync the conversation to Obsidian
 
 ### Auto-sync
 
@@ -93,27 +73,17 @@ When enabled in settings, conversations sync automatically as new messages appea
 ### Session Exclusion
 
 Long-press the status dot for 2 seconds to exclude a session:
-- The dot blinks orange while deleting files (md, JSON tree, LLM markdown)
-- After deletion, the dot turns yellow (excluded)
-- Click the yellow dot to resume syncing for that session
+- Orange blink while deleting files (md, JSON tree, LLM markdown)
+- Yellow dot = excluded
+- Click yellow dot to resume syncing
 
-### Deep Research / Extended Thinking Export
+### Deep Research / Extended Thinking
 
-**Gemini Deep Research:**
-1. Open the Deep Research panel (expanded view)
-2. Click the "Sync" button
-3. The full report will be saved with its original heading structure
-
-**Claude Extended Thinking (Artifacts):**
-1. Open a conversation with an Artifact
-2. Click the "Sync" button
-3. The Artifact content with inline citations and sources will be extracted
+Works with Gemini Deep Research panels and Claude Artifacts with inline citations.
 
 ## Output Format
 
-### Conversation Format
-
-Conversations are saved as Markdown files with YAML frontmatter:
+Conversations are saved as Markdown with YAML frontmatter and Obsidian callouts:
 
 ```markdown
 ---
@@ -122,7 +92,6 @@ title: "How to implement authentication"
 source: gemini
 url: https://gemini.google.com/app/abc123
 created: 2025-01-10T12:00:00Z
-modified: 2025-01-10T12:30:00Z
 tags:
   - ai-conversation
   - gemini
@@ -136,75 +105,6 @@ message_count: 4
 > To implement JWT authentication, you'll need to...
 ```
 
-### Tool Content Format (Claude)
-
-When "Include tool/search results" is enabled, Claude's web search and tool activity are rendered as collapsible callouts before the assistant response:
-
-```markdown
-> [!ABSTRACT]- Searched the web
-> Rust latest version 2026 (10 results)
-> - Rust Versions | Rust Changelogs (releases.rs)
-> - Rust | endoflife.date (endoflife.date)
-
-> [!NOTE] Claude
-> Here are the latest Rust version details...
-```
-
-The `[!ABSTRACT]-` callout is collapsed by default in Obsidian (the `-` suffix).
-
-### Deep Research Format
-
-Deep Research reports include a `type` field and preserve the original structure:
-
-```markdown
----
-id: gemini_deep-research-a1b2c3d4
-title: "Comprehensive Analysis of..."
-source: gemini
-type: deep-research
-url: https://gemini.google.com/app/xxx
-created: 2025-01-11T10:00:00Z
-modified: 2025-01-11T10:00:00Z
-tags:
-  - ai-research
-  - deep-research
-  - gemini
-message_count: 1
----
-
-# Report Title
-
-## 1. Introduction
-
-The report content with original headings...
-
-## 2. Analysis
-
-Detailed analysis sections...
-```
-
-## Development
-
-```bash
-# Development server with HMR
-npm run dev
-
-# Production build
-npm run build
-
-# Lint code
-npm run lint
-
-# Format code
-npm run format
-
-# Run tests
-npm test
-
-# Run tests with coverage
-npm run test:coverage
-```
-
 ## Architecture
 
 ```
@@ -215,47 +115,38 @@ Background Service Worker
 Obsidian Local REST API (127.0.0.1:27123)
 ```
 
-### Key Components
-
 | Component | Description |
 |-----------|-------------|
 | `src/content/` | Content script for DOM extraction and UI |
-| `src/content/extractors/gemini.ts` | Gemini conversation & Deep Research extractor |
-| `src/content/extractors/claude.ts` | Claude conversation & Artifact extractor |
-| `src/content/extractors/chatgpt.ts` | ChatGPT conversation extractor |
-| `src/content/extractors/perplexity.ts` | Perplexity conversation extractor |
 | `src/content/auto-sync.ts` | MutationObserver-based auto-sync |
+| `src/content/extractors/` | Platform-specific extractors (Gemini, Claude, ChatGPT, Perplexity) |
 | `src/background/` | Service worker for API communication |
 | `src/popup/` | Settings UI |
-| `src/lib/` | Shared utilities and types |
 | `src/lib/tree-builder.ts` | Conversation tree builder (branch-preserving JSON) |
 | `src/lib/tree-to-markdown.ts` | Tree to LLM-optimized indent markdown |
 
-## Security
+## Development
 
-- **Secure storage**: API key stored in `chrome.storage.local` (not synced)
-- **Input validation**: Message content and filenames validated
-- **Path traversal protection**: Vault paths sanitized against directory traversal attacks
-- **Sender verification**: Only trusted origins can send messages
-- **CSP**: Content Security Policy configured for extension pages
-- **YAML escaping**: Frontmatter values properly escaped
+```bash
+npm run dev          # Dev server with HMR
+npm run build        # Production build
+npm run lint         # ESLint
+npm run format       # Prettier
+npm test             # Run tests
+npm run test:coverage # Tests with coverage
+```
 
-## Privacy
+## Security & Privacy
 
-This extension:
-- Does **not** collect or transmit your data to external servers
+- API key stored locally in `chrome.storage.local` (not synced)
 - Only communicates with your local Obsidian instance (127.0.0.1)
-- Stores API key locally in your browser (not synced to cloud)
-
-See our [Privacy Policy](https://sho7650.github.io/obsidian-AI-exporter/privacy.html) for details.
+- Input validation, path traversal protection, sender verification
+- No data collection or external transmission
 
 ## License
 
-MIT
+MIT — see [LICENSE](LICENSE)
 
-## Contributing
+## Acknowledgements
 
-Contributions are welcome! Please read the [CLAUDE.md](CLAUDE.md) for development guidelines.
-
-[![Buy Me a Coffee](https://img.buymeacoffee.com/button-api/?text=Buy%20me%20a%20coffee&emoji=&slug=sho7650&button_colour=FFDD00&font_colour=000000&font_family=Cookie&outline_colour=000000&coffee_colour=ffffff)](https://www.buymeacoffee.com/sho7650)
-
+This project is based on [obsidian-AI-exporter](https://github.com/sho7650/obsidian-AI-exporter) by [sho7650](https://github.com/sho7650).

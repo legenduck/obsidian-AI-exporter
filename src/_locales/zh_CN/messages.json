@@ -4,122 +4,122 @@
     "description": "Extension name shown in browser"
   },
   "extDescription": {
-    "message": "Auto-sync AI conversations from Gemini, Claude, ChatGPT, and Perplexity to Obsidian",
+    "message": "将 Gemini、Claude、ChatGPT 和 Perplexity 的 AI 对话自动同步到 Obsidian",
     "description": "Extension description shown in browser and store"
   },
 
   "ui_syncButton": {
-    "message": "Sync to Obsidian",
+    "message": "同步到 Obsidian",
     "description": "Text on the floating sync button"
   },
   "ui_syncing": {
-    "message": "Syncing...",
+    "message": "同步中...",
     "description": "Text shown while syncing"
   },
 
   "settings_title": {
-    "message": "Settings",
+    "message": "设置",
     "description": "Settings page title"
   },
   "settings_apiKey": {
-    "message": "Obsidian API Key",
+    "message": "Obsidian API 密钥",
     "description": "Label for API key input"
   },
   "settings_apiKeyPlaceholder": {
-    "message": "Enter your Local REST API key",
+    "message": "输入您的 Local REST API 密钥",
     "description": "Placeholder for API key input"
   },
   "settings_port": {
-    "message": "Port",
+    "message": "端口",
     "description": "Label for port input"
   },
   "settings_vaultPath": {
-    "message": "Vault Path",
+    "message": "Vault 路径",
     "description": "Label for vault path input"
   },
   "settings_vaultPathPlaceholder": {
-    "message": "e.g., AI/{platform}",
+    "message": "例如：AI/{platform}",
     "description": "Placeholder for vault path input"
   },
   "settings_advancedSettings": {
-    "message": "Advanced Settings",
+    "message": "高级设置",
     "description": "Collapsible section title for advanced settings"
   },
   "settings_vaultPathHelp": {
-    "message": "Use {platform} to auto-organize by source (gemini, claude, chatgpt, perplexity)",
+    "message": "使用 {platform} 按来源自动分类（gemini、claude、chatgpt、perplexity）",
     "description": "Help text explaining template variable for vault path"
   },
   "settings_messageFormat": {
-    "message": "Message Format",
+    "message": "消息格式",
     "description": "Label for message format select"
   },
   "settings_format_callout": {
-    "message": "Callout (Recommended)",
+    "message": "Callout（推荐）",
     "description": "Callout format option"
   },
   "settings_format_blockquote": {
-    "message": "Blockquote",
+    "message": "引用块",
     "description": "Blockquote format option"
   },
   "settings_format_plain": {
-    "message": "Plain",
+    "message": "纯文本",
     "description": "Plain format option"
   },
   "settings_userCallout": {
-    "message": "User Callout Type",
+    "message": "用户 Callout 类型",
     "description": "Label for user callout type"
   },
   "settings_assistantCallout": {
-    "message": "Assistant Callout Type",
+    "message": "助手 Callout 类型",
     "description": "Label for assistant callout type"
   },
   "settings_frontmatter": {
-    "message": "Frontmatter Options",
+    "message": "Frontmatter 选项",
     "description": "Section title for frontmatter options"
   },
   "settings_includeId": {
-    "message": "Include ID",
+    "message": "包含 ID",
     "description": "Checkbox label for include ID"
   },
   "settings_includeTitle": {
-    "message": "Include Title",
+    "message": "包含标题",
     "description": "Checkbox label for include title"
   },
   "settings_includeTags": {
-    "message": "Include Tags",
+    "message": "包含标签",
     "description": "Checkbox label for include tags"
   },
   "settings_includeSource": {
-    "message": "Include Source & URL",
+    "message": "包含来源和 URL",
     "description": "Checkbox label for include source"
   },
   "settings_includeDates": {
-    "message": "Include Dates",
+    "message": "包含日期",
     "description": "Checkbox label for include dates"
   },
   "settings_includeMessageCount": {
-    "message": "Include Message Count",
+    "message": "包含消息数量",
     "description": "Checkbox label for include message count"
   },
   "settings_testConnection": {
-    "message": "Test Connection",
+    "message": "测试连接",
     "description": "Test connection button text"
   },
   "settings_save": {
-    "message": "Save Settings",
+    "message": "保存设置",
     "description": "Save button text"
   },
   "settings_showApiKey": {
-    "message": "Show API key",
+    "message": "显示 API 密钥",
     "description": "Tooltip for show API key button"
   },
   "settings_hideApiKey": {
-    "message": "Hide API key",
+    "message": "隐藏 API 密钥",
     "description": "Tooltip for hide API key button"
   },
 
   "toast_success_created": {
-    "message": "Created: $FILE$",
+    "message": "已创建：$FILE$",
     "description": "Success message when file is created",
     "placeholders": {
       "file": {
@@ -129,7 +129,7 @@
     }
   },
   "toast_success_updated": {
-    "message": "Updated: $FILE$",
+    "message": "已更新：$FILE$",
     "description": "Success message when file is updated",
     "placeholders": {
       "file": {
@@ -139,19 +139,19 @@
     }
   },
   "toast_error_noApiKey": {
-    "message": "Please configure your Obsidian API key in the extension settings",
+    "message": "请在扩展设置中配置您的 Obsidian API 密钥",
     "description": "Error when API key is not set"
   },
   "toast_error_connectionFailed": {
-    "message": "Cannot connect to Obsidian. Is it running?",
+    "message": "无法连接到 Obsidian。请确认 Obsidian 是否正在运行。",
     "description": "Error when connection fails"
   },
   "toast_error_extractionFailed": {
-    "message": "Failed to extract conversation",
+    "message": "对话提取失败",
     "description": "Error when extraction fails"
   },
   "toast_error_saveFailed": {
-    "message": "Failed to save: $ERROR$",
+    "message": "保存失败：$ERROR$",
     "description": "Error when save fails",
     "placeholders": {
       "error": {
@@ -161,74 +161,74 @@
     }
   },
   "toast_info_extracting": {
-    "message": "Extracting conversation...",
+    "message": "正在提取对话...",
     "description": "Info message during extraction"
   },
   "toast_info_saving": {
-    "message": "Saving to Obsidian...",
+    "message": "正在保存到 Obsidian...",
     "description": "Info message during save"
   },
   "toast_warning_partial": {
-    "message": "Some content may not have been extracted",
+    "message": "部分内容可能未被提取",
     "description": "Warning when partial extraction"
   },
 
   "error_invalidApiKey": {
-    "message": "Invalid API key format",
+    "message": "API 密钥格式无效",
     "description": "Error for invalid API key"
   },
   "error_apiKeyTooShort": {
-    "message": "API key is too short (minimum 16 characters)",
+    "message": "API 密钥过短（最少 16 个字符）",
     "description": "Error for short API key"
   },
   "error_apiKeyRequired": {
-    "message": "API key is required",
+    "message": "API 密钥为必填项",
     "description": "Error when API key is empty"
   },
   "error_invalidVaultPath": {
-    "message": "Vault path contains invalid characters",
+    "message": "Vault 路径包含无效字符",
     "description": "Error for invalid vault path"
   },
   "error_pathTraversal": {
-    "message": "Path traversal detected in vault path",
+    "message": "Vault 路径中检测到路径遍历",
     "description": "Error for path traversal attempt"
   },
   "error_vaultPathTooLong": {
-    "message": "Vault path is too long (max 200 characters)",
+    "message": "Vault 路径过长（最多 200 个字符）",
     "description": "Error for long vault path"
   },
   "error_connectionTimeout": {
-    "message": "Connection timed out. Please check your settings.",
+    "message": "连接超时。请检查您的设置。",
     "description": "Error for connection timeout"
   },
   "error_obsidianNotRunning": {
-    "message": "Obsidian REST API is not running. Please ensure Obsidian is open and the Local REST API plugin is enabled.",
+    "message": "Obsidian REST API 未运行。请确保 Obsidian 已打开并启用了 Local REST API 插件。",
     "description": "Error when Obsidian is not running"
   },
   "error_invalidPort": {
-    "message": "Port must be between 1024 and 65535",
+    "message": "端口必须在 1024 到 65535 之间",
     "description": "Error for invalid port"
   },
 
   "status_connectionSuccess": {
-    "message": "Connection successful!",
+    "message": "连接成功！",
     "description": "Success status for connection test"
   },
   "status_settingsSaved": {
-    "message": "Settings saved successfully!",
+    "message": "设置已保存！",
     "description": "Success status for settings save"
   },
   "status_testing": {
-    "message": "Testing connection...",
+    "message": "正在测试连接...",
     "description": "Status while testing connection"
   },
 
   "settings_outputDestinations": {
-    "message": "Output Destinations",
+    "message": "输出目标",
     "description": "Section title for output destinations"
   },
   "settings_outputHelp": {
-    "message": "Select where to save conversations",
+    "message": "选择对话的保存位置",
     "description": "Help text for output destinations"
   },
   "settings_outputObsidian": {
@@ -236,19 +236,19 @@
     "description": "Obsidian output option"
   },
   "settings_outputFile": {
-    "message": "Download File",
+    "message": "下载文件",
     "description": "File download output option"
   },
   "settings_outputClipboard": {
-    "message": "Copy to Clipboard",
+    "message": "复制到剪贴板",
     "description": "Clipboard output option"
   },
   "success_allOutputs": {
-    "message": "Saved to all destinations",
+    "message": "已保存到所有目标",
     "description": "Success message when all outputs succeed"
   },
   "success_partialOutputs": {
-    "message": "Partial success: $DETAILS$",
+    "message": "部分成功：$DETAILS$",
     "description": "Warning message for partial success",
     "placeholders": {
       "details": {
@@ -258,35 +258,35 @@
     }
   },
   "error_noOutputSelected": {
-    "message": "Please select at least one output destination",
+    "message": "请至少选择一个输出目标",
     "description": "Error when no output is selected"
   },
   "error_allOutputsFailed": {
-    "message": "Failed to save",
+    "message": "保存失败",
     "description": "Error when all outputs fail"
   },
   "tooltip_obsidianDisabled": {
-    "message": "Enable Obsidian output to configure",
+    "message": "启用 Obsidian 输出以进行配置",
     "description": "Tooltip when Obsidian settings are disabled"
   },
   "error_downloadCanceled": {
-    "message": "Download was canceled",
+    "message": "下载已取消",
     "description": "Error when download is canceled"
   },
   "error_networkError": {
-    "message": "Network error occurred",
+    "message": "发生网络错误",
     "description": "Error for network issues"
   },
   "error_permissionDenied": {
-    "message": "Permission denied",
+    "message": "权限被拒绝",
     "description": "Error for permission issues"
   },
   "error_clipboardFailed": {
-    "message": "Failed to copy to clipboard",
+    "message": "复制到剪贴板失败",
     "description": "Error when clipboard copy fails"
   },
   "error_outputFailed": {
-    "message": "Failed to save to $OUTPUT$",
+    "message": "保存到 $OUTPUT$ 失败",
     "description": "Error for specific output failure",
     "placeholders": {
       "output": {
@@ -300,33 +300,33 @@
     "description": "Obsidian output name"
   },
   "output_file": {
-    "message": "file",
+    "message": "文件",
     "description": "File output name"
   },
   "output_clipboard": {
-    "message": "clipboard",
+    "message": "剪贴板",
     "description": "Clipboard output name"
   },
 
   "settings_enableAppendMode": {
-    "message": "Append Mode",
+    "message": "追加模式",
     "description": "Label for append mode toggle"
   },
   "settings_appendModeHelp": {
-    "message": "Only add new messages to existing notes",
+    "message": "仅向现有笔记添加新消息",
     "description": "Help text for append mode toggle"
   },
   "settings_enableToolContent": {
-    "message": "Include tool/search results",
+    "message": "包含工具/搜索结果",
     "description": "Label for tool content toggle"
   },
   "settings_toolContentHelp": {
-    "message": "Save web search and tool results from Claude",
+    "message": "保存 Claude 的网页搜索和工具结果",
     "description": "Help text for tool content toggle"
   },
 
   "toast_appended": {
-    "message": "$COUNT$ new message(s) appended",
+    "message": "已追加 $COUNT$ 条新消息",
     "description": "Toast when messages are appended",
     "placeholders": {
       "count": {
@@ -336,7 +336,7 @@
     }
   },
   "toast_noNewMessages": {
-    "message": "No new messages to append",
+    "message": "没有新消息可追加",
     "description": "Toast when no new messages found"
   }
 }

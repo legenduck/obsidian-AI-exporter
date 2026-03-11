@@ -1,9 +1,9 @@
 {
   "extName": {
-    "message": "Obsidian AI Exporter"
+    "message": "Obsidian Chat Sync"
   },
   "extDescription": {
-    "message": "Gemini、Claude、ChatGPT、Perplexity の AI 会話を Obsidian へエクスポート（Local REST API 経由）"
+    "message": "Gemini、Claude、ChatGPT、Perplexity の AI 会話を Obsidian に自動同期"
   },
 
   "ui_syncButton": {
